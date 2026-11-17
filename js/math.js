@@ -54,7 +54,8 @@ EX.push({course:'math',id:'toss',lesson:1,name:'동전·주사위 던지기',siz
   else{const cols=Math.ceil(Math.sqrt(m*(tW-20)/(tH-60))),rows=Math.ceil(m/cols),cell=Math.min((tW-20)/cols,(tH-60)/rows),sz=Math.min(cell*.8,72),pop=clamp(s.age/0.18,0,1);
    const ox=tx+(tW-cols*cell)/2+cell/2,oy=ty+26+((tH-60)-rows*cell)/2+cell/2;
    ctx.save();ctx.beginPath();ctx.rect(tx+2,ty+2,tW-4,tH-4);ctx.clip();s.sample.forEach((v,i)=>{const x=ox+(i%cols)*cell,y=oy+Math.floor(i/cols)*cell,m2=tumble(s.age,i);
-    coin?drawCoin(x,y+m2.dy,sz/2,m2.done?v===0:m2.fl>0,m2.done?1:m2.fl):drawDie(x,y+m2.dy,sz,m2.done?v+1:(i*7+Math.floor(s.age*18))%K+1,K,null,m2.rot);});ctx.restore();
+    if(m2.done&&sz>26)puff('dust',x,y+sz*.42,sz*.5,(s.age-.5-i*.01)/.35);
+    coin?drawCoin(x,y+m2.dy,sz/2,m2.done?v===0:m2.fl>0,m2.done?1:m2.fl):m2.done?drawDie(x,y,sz,v+1,K):drawDieRoll(x,y+m2.dy,sz,K,s.age*9+i*1.7);});ctx.restore();
    txt(s.per>m?`이번에 던진 ${fmtN(s.per)}개 중 ${m}개만 보여 줘요`:`이번에 던진 ${m}개`,tx+tW/2,ty+tH-15,MC.sub,12,true,'center');}
   if(s.rounds>1&&s.round>0)txt(`${s.round} / ${s.rounds}회째 자동으로 던지는 중`.replace(s.queue?'':' 자동으로 던지는 중',''),tx+12,ty+16,MC.red,12,true);
   const gx=404,gy=16,gw=380,gh=300;card(gx,gy,gw,gh,'지금까지 나온 비율');
@@ -95,21 +96,21 @@ EX.push({course:'math',id:'group',lesson:1,name:'묶어서 던지기',size:[800,
  draw(s){paper();const c=this.cfg(s),lo=this.out(s,c),mob=FS>1.3;
   card(16,16,372,448,`일어날 수 있는 모든 경우: ${c.total}가지`);
   if(c.dice){const f=c.f,cell=Math.min(40,300/f),ox=16+(372-cell*(f+1))/2+cell,oy=118;
-   txt('방금 나온 눈',34,66,MC.sub,12,true);if(s.last){[0,1].forEach(j=>{const m2=tumble(s.age,j*8,.45);drawDie(160+j*50,64+m2.dy*.5,40,m2.done?s.last[j]:rint(f)+1,f,null,m2.rot);});if(s.age>.5)txt('합 '+(lo+2),245,64,MC.red,17,true);}
+   txt('방금 나온 눈',34,66,MC.sub,12,true);if(s.last){[0,1].forEach(j=>{const m2=tumble(s.age,j*8,.45);m2.done?drawDie(160+j*50,64,40,s.last[j],f):drawDieRoll(160+j*50,64+m2.dy*.5,40,f,s.age*9+j*2);});if(s.age>.5)txt('합 '+(lo+2),245,64,MC.red,17,true);}
    for(let i=1;i<=f;i++){txt(i,ox+(i-.5)*cell,oy-12,MC.sub,11,true,'center');txt(i,ox-12,oy+(i-.5)*cell,MC.sub,11,true,'center');}
    for(let a=1;a<=f;a++)for(let b=1;b<=f;b++){const t=a+b,x=ox+(b-1)*cell,y=oy+(a-1)*cell,hit=s.last&&s.age>.5&&s.last[0]===a&&s.last[1]===b,same=lo>=0&&s.age>.5&&t===lo+2;
      ctx.fillStyle=hit?'#f9b8b2':same?'#ffe5e2':'#fff';ctx.fillRect(x,y,cell,cell);ctx.strokeStyle='#c9d6e5';ctx.lineWidth=1;ctx.strokeRect(x,y,cell,cell);
      ctx.font=`${same?900:500} ${cell*.42}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=same?MC.red:MC.ink;ctx.fillText(t,x+cell/2,y+cell/2+1);}
    if(!mob)txt('세로: 첫째 주사위 · 가로: 둘째 주사위 · 칸 속 숫자: 두 눈의 합',202,oy+f*cell+20,MC.sub,11,false,'center');
   }else{const k=c.k,colW=340/(k+1),r=Math.min(11,(colW-12)/(2*k)-1);
-   txt('방금 던진 결과',34,66,MC.sub,12,true);if(s.last){s.last.forEach((v,j)=>{const m2=tumble(s.age,j*6,.45);drawCoin(170+j*42,64+m2.dy*.45,17,m2.done?v:m2.fl>0,m2.done?1:m2.fl);});if(s.age>.5)txt('앞면 '+lo+'개',170+k*42,64,MC.red,15,true);}
+   txt('방금 던진 결과',34,66,MC.sub,12,true);if(s.last){s.last.forEach((v,j)=>{const m2=tumble(s.age,j*6,.45);drawCoin(170+j*42,64+m2.dy*.45,17,m2.done?v:m2.fl>0,m2.done?1:m2.fl,j%2===1);});if(s.age>.5)txt('앞면 '+lo+'개',170+k*42,64,MC.red,15,true);}
    for(let h=0;h<=k;h++){const cx=32+colW*(h+.5);txt('앞면 '+h+'개',cx,112,h===lo?MC.red:MC.sub,mob?9:12,true,'center');let row=0;
      for(let mask=0;mask<(1<<k);mask++){const bits=[];let cnt=0;for(let j=0;j<k;j++){const v=!!(mask>>(k-1-j)&1);bits.push(v);if(v)cnt++;}if(cnt!==h)continue;
        const y=140+row*(2*r+14),hit=s.last&&s.age>.5&&bits.every((v,j)=>v===s.last[j]);
        box(cx-k*(r+1)-4,y-r-4,2*k*(r+1)+8,2*r+8,hit?'#ffe5e2':'#f6f8fb',hit?MC.red:null,6,2.5);
-       bits.forEach((v,j)=>drawCoin(cx-(k-1)*(r+1)+j*2*(r+1),y,r,v));row++;}
+       bits.forEach((v,j)=>drawCoin(cx-(k-1)*(r+1)+j*2*(r+1),y,r,v,1,j%2===1));row++;}
      txt(c.ways[h]+'가지',cx,140+row*(2*r+14)+4,MC.ink,mob?9:12,true,'center');}
-   if(!mob)txt('순서가 다르면 다른 경우로 세요: (앞, 뒤)와 (뒤, 앞)',202,444,MC.sub,11,false,'center');}
+   if(!mob)txt('순서가 다르면 다른 경우로 세요: 금색과 은색 동전은 서로 다른 동전이에요',202,444,MC.sub,11,false,'center');}
   card(404,16,380,448,'계산한 확률(빨간 선)과 실험 결과(막대)');
   const vals=s.disp.length===c.ways.length?s.disp:c.ways.map(()=>0),exp=c.ways.map(w=>w/c.total);
   barChart(424,70,340,300,{vals,expect:exp,labels:c.ways.map((_,i)=>c.label(i)),max:Math.max(...exp,...vals)*1.15,cols:c.ways.map((_,i)=>i===lo&&s.age>.5?'#f3a0a4':MC.bar),tops:c.ways.length<=7?c.ways.map(w=>w+'/'+c.total):null});
@@ -302,7 +303,7 @@ EX.push({course:'math',id:'lln',lesson:3,name:'큰 수의 법칙',size:[800,480]
   plotLines(gx,gy,gw,gh,s.runs.map((r,i)=>({pts:r.pts,col:RUNCOL[i%5],w:i===s.runs.length-1?2.6:1.6,a:i===s.runs.length-1?1:.45})),0,ymax);
   if(R.n){const lp=R.pts[R.pts.length-1];circle(gx+lp[0]*gw,gy+gh-clamp(lp[1]/ymax,0,1)*gh,5,RUNCOL[(s.runs.length-1)%5],'#fff',2);}
   txt('던진 횟수 →',gx+gw,gy+gh+34,MC.sub,11,true,'right');
-  if(s.auto||s.age<.5){const busy=s.auto?s.t*16:s.age*14;coin?drawCoin(gx+gw-26,gy+26-Math.abs(Math.sin(busy*.6))*14,16,Math.cos(busy)>0,Math.cos(busy)):drawDie(gx+gw-26,gy+26-Math.abs(Math.sin(busy*.6))*14,28,Math.floor(busy)%6+1,6,null,busy*.4);}
+  if(s.auto||s.age<.5){const busy=s.auto?s.t*16:s.age*14;coin?drawCoin(gx+gw-26,gy+26-Math.abs(Math.sin(busy*.6))*14,16,Math.cos(busy)>0,Math.cos(busy)):drawDieRoll(gx+gw-26,gy+26-Math.abs(Math.sin(busy*.6))*14,28,6,busy*.6);}
   card(16,348,768,116);const diff=R.k-R.n*p,cx=[36,230,424,610];
   const S=(i,l,v,col)=>{txt(l,cx[i],372,MC.sub,12,true);txt(v,cx[i],372+36*Math.min(FS,1.35),col||MC.ink,mob?15:23,true);};
   S(0,'던진 횟수',fmtN(R.n)+'번');S(1,what+' 횟수',fmtN(R.k)+'번');
@@ -327,7 +328,7 @@ EX.push({course:'math',id:'rice',lesson:3,name:'쌀알 뿌리기',size:[800,470]
  AREA:40,QC:[['검정','#2b2b2b'],['파랑','#3b7ddd'],['빨강','#e0473c'],['노랑','#f2c230']],
  br(t){return 0.33+0.07*Math.sin(3*t)+0.05*Math.cos(5*t)+0.03*Math.sin(2*t+1);},
  inside(s,x,y){if(s.p.shape==='circle')return (x-.5)**2+(y-.5)**2<=.25;const dx=x-.5,dy=y-.5;return Math.hypot(dx,dy)<=this.br(Math.atan2(dy,dx));},
- reset(s){s.n=0;s.in=0;s.q=[0,0,0,0];s.dots=0;s.todo=0;s.batch=1;s.left=0;if(!s.off){s.off=document.createElement('canvas');s.off.width=s.off.height=600;}
+ reset(s){s.n=0;s.in=0;s.q=[0,0,0,0];s.dots=0;s.todo=0;s.batch=1;s.left=0;s.fly=[];s.pour=0;if(!s.off){s.off=document.createElement('canvas');s.off.width=s.off.height=600;}
   const g=s.off.getContext('2d'),Z=600;g.clearRect(0,0,Z,Z);
   if(s.p.shape==='quad'){this.QC.forEach((c,i)=>{g.fillStyle=c[1];g.globalAlpha=.88;g.fillRect((i%2)*Z/2,Math.floor(i/2)*Z/2,Z/2,Z/2);});g.globalAlpha=1;}
   else{g.fillStyle='#fdf1d6';g.fillRect(0,0,Z,Z);g.fillStyle='#dff0e6';g.strokeStyle='#2e9e6b';g.lineWidth=4;g.beginPath();
@@ -336,12 +337,14 @@ EX.push({course:'math',id:'rice',lesson:3,name:'쌀알 뿌리기',size:[800,470]
   if(s.p.shape==='blob'){let a=0;const N=7200;for(let i=0;i<N;i++){const r=this.br(i/N*2*Math.PI);a+=r*r/2*(2*Math.PI/N);}s.true=a*this.AREA;}else s.true=this.AREA*Math.PI/4;},
  param(s,k){if(k==='shape')this.reset(s);},
  act(s,a){if(a==='clear')return this.reset(s);s.todo+=s.p.per;s.batch=Math.max(1,Math.ceil(s.todo/26));s.left=Math.min(2500,s.todo);},
- step(s){if(!s.todo)return;const g=s.off.getContext('2d'),n=Math.min(s.todo,s.batch),quad=s.p.shape==='quad',draw=Math.min(n,Math.ceil(s.left/Math.max(1,Math.ceil(s.todo/s.batch))));
+ step(s,dt){s.fly=(s.fly||[]).filter(f=>(f.t+=dt)<f.d);s.pour=Math.max(0,(s.pour||0)-dt*2);if(!s.todo)return;s.pour=1;for(let i=0;i<3;i++)s.fly.push({x:rnd(60,410),y:rnd(70,420),t:0,d:rnd(.25,.4),f:rint(5),r:rnd(-.5,.5)});const g=s.off.getContext('2d'),n=Math.min(s.todo,s.batch),quad=s.p.shape==='quad',draw=Math.min(n,Math.ceil(s.left/Math.max(1,Math.ceil(s.todo/s.batch))));
   for(let i=0;i<n;i++){const x=Math.random(),y=Math.random();let inn=false;if(quad)s.q[(x<.5?0:1)+(y<.5?0:2)]++;else{inn=this.inside(s,x,y);if(inn)s.in++;}
    if(i<draw&&s.dots<40000){g.fillStyle=quad?'#fffbe8':inn?'#1f7a4d':'#d9534f';g.beginPath();g.ellipse(x*600,y*600,3.4,2.2,x*9,0,7);g.fill();s.dots++;s.left--;}}
   s.n+=n;s.todo-=n;},
  draw(s){paper();const mob=FS>1.3,quad=s.p.shape==='quad',A=this.AREA;
   card(16,16,438,438,`보자기 전체 넓이 = ${A}`);ctx.drawImage(s.off,35,46,400,400);ctx.strokeStyle='#8a7d5c';ctx.lineWidth=2;ctx.strokeRect(35,46,400,400);
+  (s.fly||[]).forEach(f=>{const u=f.t/f.d,sx=410,sy=60;spr('grain'+f.f,lerp(sx,f.x,u),lerp(sy,f.y,u)-Math.sin(u*Math.PI)*60,9+5*(1-u),{rot:f.r+u*4});});
+  if(s.pour>0)spr('ricebowl',412,52,64,{rot:-.5*Math.min(1,s.pour*3),a:Math.min(1,s.pour*3)});
   if(s.n>s.dots&&!mob)txt(`쌀알 ${fmtN(s.n)}알 중 ${fmtN(s.dots)}알만 그렸어요`,235,434,MC.ink,11,true,'center','rgba(255,255,255,.85)');
   card(466,16,318,438,`뿌린 쌀알: ${fmtN(s.n)}알`);
   if(quad){this.QC.forEach((c,i)=>{const y=74+i*86*Math.min(1,1/FS*1.3);box(486,y-12,20,20,c[1],null,4);txt(c[0],514,y,MC.ink,14,true);
@@ -389,6 +392,7 @@ EX.push({course:'math',id:'monty',lesson:3,name:'몬티홀 문제',size:[800,470
    if(mine){box(x-4,dy-4,w+8,dh+8,null,MC.blue,7,4);if(w>60||!mob)txt(w>60?'내가 고른 문':'내 문',x+w/2,dy+dh+16,MC.blue,11,true,'center');}
    if(s.ph==='decide'&&i===s.other&&(w>60||!mob))txt(w>60?'바꿀 수 있는 문':'바꿀 문',x+w/2,dy+dh+16,MC.red,11,true,'center');
    if(s.ph==='done'&&i===s.final){box(x-4,dy-4,w+8,dh+8,null,i===s.car?MC.green:MC.red,7,4);}}
+  if(s.ph==='done'&&s.final===s.car&&s.age<1.6){const x=g.x(s.car)+g.dw/2;puff('spark',x,dy+dh/2,dh*.9,s.age/1.1);spr('confetti',x,dy+20+s.age*50,Math.min(90,g.dw*.9),{rot:s.age*.8,a:clamp((1.6-s.age)/.5,0,1)});}
   const msg={pick:'문을 눌러서 하나 골라 보세요',decide:`사회자가 염소 문 ${n-2}개를 열었어요. 바꿀까요?`,done:s.final===s.car?'자동차 당첨! 문을 눌러 새 판을 시작해요':'염소였어요. 문을 눌러 새 판을 시작해요',void:'사회자가 실수로 자동차를 보여 줬어요. 이 판은 무효! 문을 눌러 다시 해요'}[s.ph];
   txt(msg,400,dy+dh+44*Math.min(FS,1.2),s.ph==='done'?(s.final===s.car?MC.green:MC.red):MC.ink,15,true,'center');
   const y0=mob?292:268;card(16,y0,768,470-y0-10,'이긴 비율 (빨간 선은 계산한 확률)');
@@ -413,19 +417,20 @@ EX.push({course:'math',id:'wheel',lesson:4,name:'돌림판 부스',size:[800,480
  controls:[{type:'seg',key:'bet',label:'쿠폰을 걸 색깔',opts:Object.keys(WC).map(k=>[k,WC[k][0]]),val:'k'},
   {type:'range',key:'prize',label:'이 색을 맞추면 받는 쿠폰 (주인이 되어 바꿔 보기)',min:1,max:25,step:1,val:10,fmt:v=>v+'장'}],
  buttons:[{label:'돌리기',act:'spin'},{label:'20판 자동',act:'a20'},{label:'1000판 자동',act:'a1000'},{label:'처음부터 (상금도 원래대로)',act:'reset',ghost:true}],
- reset(s){s.prize={};Object.keys(WC).forEach(k=>s.prize[k]=WC[k][3]);s.net=0;s.n=0;s.hist=[];s.ang=0;s.spin=null;s.res=-1;s.msg='';},
+ reset(s){s.prize={};Object.keys(WC).forEach(k=>s.prize[k]=WC[k][3]);s.net=0;s.n=0;s.hist=[];s.ang=0;s.spin=null;s.res=-1;s.msg='';s.t=0;s.done0=-9;s.win=null;},
  param(s,k){if(k==='bet'){s.p.prize=s.prize[s.p.bet];buildControls();}else s.prize[s.p.bet]=s.p.prize;s.net=0;s.n=0;s.hist=[];s.msg='';},
  ev(s,c){const w=WC[c][2];return w*s.prize[c]-(20-w);},
- settle(s,i){const c=WSEQ[i],win=c===s.p.bet;s.net+=win?s.prize[c]:-1;s.n++;pushHist(s);s.res=i;s.msg=win?`${WC[c][0]}! 쿠폰 ${s.prize[c]}장을 받았어요`:`${WC[c][0]}에서 멈췄어요. 쿠폰 1장을 잃었어요`;s.win=win;},
+ settle(s,i){const c=WSEQ[i],win=c===s.p.bet;s.net+=win?s.prize[c]:-1;s.n++;pushHist(s);s.res=i;s.done0=s.t;s.msg=win?`${WC[c][0]}! 쿠폰 ${s.prize[c]}장을 받았어요`:`${WC[c][0]}에서 멈췄어요. 쿠폰 1장을 잃었어요`;s.win=win;},
  act(s,a){if(a==='reset'){this.reset(s);s.p.prize=s.prize[s.p.bet];buildControls();return;}
   if(s.spin)return;if(a==='spin'){const i=rint(20),seg=Math.PI*2/20,to=-(i+.5)*seg-rnd(-.3,.3)*seg;let d=((to-s.ang)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)+Math.PI*8;s.spin={t:0,from:s.ang,d,i};s.msg='';}
   else{const k=a==='a20'?20:1000;let i=0;for(let j=0;j<k;j++){i=rint(20);this.settle(s,i);}s.ang=-(i+.5)*Math.PI/10;s.msg=`${k}판을 자동으로 돌렸어요`;s.win=null;}},
- step(s,dt){if(s.spin){s.spin.t+=dt/2.4;const u=Math.min(1,s.spin.t),e=1-Math.pow(1-u,3);s.ang=s.spin.from+s.spin.d*e;if(u>=1){const i=s.spin.i;s.spin=null;this.settle(s,i);}}},
- draw(s){paper();const mob=FS>1.3,cx=168,cy=190,R=138,seg=Math.PI*2/20,b=s.p.bet,w=WC[b][2],p=s.prize[b],e=this.ev(s,b);
-  card(16,16,304,448);
+ step(s,dt){s.t=(s.t||0)+dt;if(s.spin){s.spin.t+=dt/2.4;const u=Math.min(1,s.spin.t),e=1-Math.pow(1-u,3);s.ang=s.spin.from+s.spin.d*e;if(u>=1){const i=s.spin.i;s.spin=null;this.settle(s,i);}}},
+ draw(s){paper();const mob=FS>1.3,cx=168,cy=178,R=100,seg=Math.PI*2/20,b=s.p.bet,w=WC[b][2],p=s.prize[b],e=this.ev(s,b);
+  card(16,16,304,448);const fk=(R+4)/92,hasF=spr('wheel_frame',cx,cy+6.5*fk,285*fk);
   for(let i=0;i<20;i++){const a0=-Math.PI/2+s.ang+i*seg;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a0+seg);ctx.closePath();ctx.fillStyle=WC[WSEQ[i]][1];ctx.globalAlpha=WSEQ[i]===b?1:.5;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
-  circle(cx,cy,16,'#fff',MC.ink,2.5);ctx.fillStyle=MC.ink;ctx.beginPath();ctx.moveTo(cx-11,cy-R-14);ctx.lineTo(cx+11,cy-R-14);ctx.lineTo(cx,cy-R+10);ctx.closePath();ctx.fill();
-  txt(s.msg||'색을 고르고 돌려 보세요',168,360,s.win===true?MC.green:s.win===false?MC.red:MC.ink,mob?10:13,true,'center');
+  circle(cx,cy,13,'#f6c94a','#a8772a',2.5);if(!spr('needle',cx,cy-R-16,52)){ctx.fillStyle=MC.ink;ctx.beginPath();ctx.moveTo(cx-11,cy-R-14);ctx.lineTo(cx+11,cy-R-14);ctx.lineTo(cx,cy-R+10);ctx.closePath();ctx.fill();}
+  if(s.win===true)puff('spark',cx,cy,170,(s.t-s.done0)/1);
+  txt(s.msg||'색을 고르고 돌려 보세요',168,374,s.win===true?MC.green:s.win===false?MC.red:MC.ink,mob?10:13,true,'center');
   spr('coupons',262,424,54);txt('가진 쿠폰',40,404,MC.sub,12,true);txt(`${20+s.net}장`,40,404+30*Math.min(FS,1.3),20+s.net<0?MC.red:MC.ink,mob?17:24,true);
   if(!mob)txt(20+s.net<0?'(빌린 쿠폰)':`20장에서 시작 · ${fmtN(s.n)}판`,150,438,MC.sub,12,true);
   card(332,16,452,208,`${WC[b][0]}에 걸 때의 기대값`);
@@ -450,7 +455,7 @@ EX.push({course:'math',id:'dicebooth',lesson:4,name:'주사위 부스',size:[800
  controls:[{type:'range',key:'bet',label:'쿠폰을 걸 숫자 (두 눈의 합)',min:2,max:12,step:1,val:7,fmt:v=>'합 '+v},
   {type:'range',key:'prize',label:'이 숫자를 맞추면 받는 쿠폰',min:1,max:40,step:1,val:4,fmt:v=>v+'장'}],
  buttons:[{label:'굴리기',act:'roll'},{label:'36판 자동',act:'a36'},{label:'3600판 자동',act:'a3600'},{label:'처음부터 (상금도 원래대로)',act:'reset',ghost:true}],
- reset(s){s.prize={...DPRIZE};s.net=0;s.n=0;s.hist=[];s.last=null;s.msg='';s.win=null;s.rolling=0;s.t=0;},
+ reset(s){s.prize={...DPRIZE};s.net=0;s.n=0;s.hist=[];s.last=null;s.msg='';s.win=null;s.rolling=0;s.t=0;s.done0=-9;},
  param(s,k){if(k==='bet'){s.p.prize=s.prize[s.p.bet];buildControls();}else s.prize[s.p.bet]=s.p.prize;s.net=0;s.n=0;s.hist=[];s.msg='';s.win=null;},
  ways(t){return 6-Math.abs(7-t);},
  ev(s,t){const w=this.ways(t);return w*s.prize[t]-(36-w);},
@@ -458,9 +463,11 @@ EX.push({course:'math',id:'dicebooth',lesson:4,name:'주사위 부스',size:[800
  act(s,a){if(a==='reset'){this.reset(s);s.p.prize=s.prize[s.p.bet];buildControls();return;}
   if(s.rolling>0)return;if(a==='roll'){s.rolling=.7;s.msg='';s.win=null;if(!s.last)s.last=[1,1];}
   else{const k=a==='a36'?36:3600;for(let i=0;i<k;i++)this.play(s);s.win=null;s.msg=`${fmtN(k)}판을 자동으로 굴렸어요`;}},
- step(s,dt){s.t+=dt;if(s.rolling>0){s.rolling-=dt;if(s.rolling<=0){s.rolling=0;s.win=this.play(s);s.msg=s.win?`합 ${s.p.bet}! 쿠폰 ${s.prize[s.p.bet]}장을 받았어요`:`합 ${s.last[0]+s.last[1]}. 쿠폰 1장을 잃었어요`;}}},
+ step(s,dt){s.t+=dt;if(s.rolling>0){s.rolling-=dt;if(s.rolling<=0){s.rolling=0;s.win=this.play(s);s.done0=s.t;s.msg=s.win?`합 ${s.p.bet}! 쿠폰 ${s.prize[s.p.bet]}장을 받았어요`:`합 ${s.last[0]+s.last[1]}. 쿠폰 1장을 잃었어요`;}}},
  draw(s){paper();const mob=FS>1.3,t=s.p.bet,w=this.ways(t),p=s.prize[t],e=this.ev(s,t);
-  card(16,16,250,208);if(s.last){const R=s.rolling>0;[0,1].forEach(j=>drawDie(96+j*90,84-(R?Math.abs(Math.sin(s.t*13+j))*18:0),64,R?rint(6)+1:s.last[j],6,null,R?Math.sin(s.t*17+j*2)*.5:0));}else txt('굴리기를 눌러 보세요',141,84,MC.sub,13,true,'center');
+  card(16,16,250,208);if(s.last){const R=s.rolling>0;const u=1-s.rolling/.7,af=s.t-s.done0;[0,1].forEach(j=>{const x=96+j*90;if(R){const hop=Math.abs(Math.sin(u*Math.PI*2.5+j))*(1-u)*40;drawDieRoll(x-(1-u)*30,84-hop,64,6,s.t*10+j*3);}else{puff('dust',x,116,40,af/.4);drawDie(x,84,64,s.last[j],6);}});if(!R&&s.win===true){puff('spark',141,70,120,af/.9);}
+  }else txt('굴리기를 눌러 보세요',141,84,MC.sub,13,true,'center');
+  spr('bell',236,44,40,{rot:s.win===true&&!s.rolling?Math.sin((s.t-s.done0)*22)*.4*Math.max(0,1-(s.t-s.done0)):0});
   txt(s.msg,141,140,s.win===true?MC.green:s.win===false?MC.red:MC.ink,mob?8:12,true,'center');
   txt('가진 쿠폰',36,176,MC.sub,12,true);txt(`${20+s.net}장`,mob?150:110,178,20+s.net<0?MC.red:MC.ink,mob?14:22,true);if(FS<1.1)txt(`${fmtN(s.n)}판`,246,178,MC.sub,12,true,'right');
   card(278,16,506,208,`합 ${t}에 걸 때의 기대값 (합 ${t}이 되는 경우 ${w}가지)`);
@@ -506,13 +513,13 @@ EX.push({course:'math',id:'bag',lesson:5,name:'공 주머니 게임 설계',size
  step(s,dt){s.age+=dt;},
  draw(s){paper();const mob=FS>1.3,T=this.T(s);
   card(16,16,210,226,`공 ${T}개`);if(!spr('bag',121,150,170,{w:190})){ctx.fillStyle='#f3e6d3';ctx.strokeStyle='#b58a52';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(46,70);ctx.quadraticCurveTo(26,230,121,230);ctx.quadraticCurveTo(216,230,196,70);ctx.closePath();ctx.fill();ctx.stroke();}
-  const A=[];BALL.forEach(b=>{for(let i=0;i<s.p['n'+b[0]];i++)A.push(b[2]);});const cols=T>12?6:5,r=T>12?9:11;
-  A.forEach((c,i)=>circle(121-(cols-1)*(r+1.5)+(i%cols)*(2*r+3),148+Math.floor(i/cols)*(2*r+3),r,c,'#8a5a3c',1.5));
-  if(s.col&&s.age<1.6){const u=clamp(s.age/.45,0,1),e=1-(1-u)*(1-u);circle(121,lerp(150,58,e),16,BALL.find(b=>b[0]===s.col)[2],'#8a5a3c',2.5);}
+  const A=[];BALL.forEach(b=>{for(let i=0;i<s.p['n'+b[0]];i++)A.push(b);});const cols=T>12?6:5,r=T>12?9:11;
+  A.forEach((b,i)=>{const x=121-(cols-1)*(r+1.5)+(i%cols)*(2*r+3),y=148+Math.floor(i/cols)*(2*r+3);if(!spr('ball_'+b[0],x,y,2*r+2))circle(x,y,r,b[2],'#8a5a3c',1.5);});
+  if(s.col&&s.age<1.6){const u=clamp(s.age/.45,0,1),e=1-(1-u)*(1-u);const by=lerp(150,58,e);if(!spr('ball_'+s.col,121,by,34))circle(121,by,16,BALL.find(b=>b[0]===s.col)[2],'#8a5a3c',2.5);if(u>=1)puff('spark',121,by,70,(s.age-.45)/.8);}
   card(238,16,546,226,'손님 입장에서 본 기대값');
   const hx=[330,440,548,676];if(!mob)['확률','상금','기대값',''].forEach((h,i)=>txt(h,hx[i],58,MC.sub,12,true,'center'));
   let bad=false,zero=false;BALL.forEach((b,i)=>{const k=b[0],c=s.p['n'+k],e=this.ev(s,k),y=92+i*44;if(e>0)bad=true;if(e===0)zero=true;
-    circle(264,y,11,b[2],'#8a5a3c',1.5);if(!mob)txt(b[1],282,y,MC.ink,13,true);
+    if(!spr('ball_'+k,264,y,24))circle(264,y,11,b[2],'#8a5a3c',1.5);if(!mob)txt(b[1],282,y,MC.ink,13,true);
     frac(c,T,hx[0],y,mob?11:13,MC.ink);txt(s.p['p'+k]+'장',hx[1],y,MC.gold,mob?11:15,true,'center');evDraw(e,T,hx[2],y,mob?11:13);
     if(!mob)txt(e>0?'손님 이득 → 주인 손해':e===0?'본전':'손님 손해 → 주인 이득',hx[3],y,e>0?MC.red:e===0?MC.green:MC.blue,12,true,'center');});
   const y4=228;txt(bad?'손님이 이득 보는 색이 있어요. 이대로 열면 부스가 망해요!':zero?'손님이 잘 골라도 본전이에요. 주인이 손해 보지 않아요.':'어떤 색에 걸어도 손님이 손해예요. 주인에게 유리한 설계예요.',258,y4-4,bad?MC.red:MC.green,mob?8:13,true);
@@ -555,6 +562,7 @@ EX.push({course:'math',id:'boxes',lesson:5,name:'상자 열기 게임',size:[800
    if((op&&u>=1)||rev){ctx.globalAlpha=rev?.45:1;if(!spr('box_open',cx3,cy3+6,hh*.8,{w:Math.min(bw,hh*1.15)}))box(x,y,bw,70,lose?'#fde4e1':'#fff4d6',lose?MC.red:'#e3b23c',6,2.5);
      const pop=just?1+Math.max(0,.5-(s.age-.35))*.8:1;if(lose)txt('꽝',cx3,cy3-6,MC.red,17*pop/Math.max(1,FS*.8),true,'center');else spr('coupon',cx3,cy3-12,hh*.36*pop,{rot:-.12});ctx.globalAlpha=1;}
    else{if(!spr('gift',cx3,cy3,hh,{rot:just?Math.sin(s.age*46)*.12:0})){box(x,y,bw,70,'#c8a06a','#7a5a2c',6,2.5);}txt(i+1,cx3,y+84,MC.sub,12/Math.max(1,FS*.8),true,'center');}}
+  {const i=s.open-1,x=x0+i*(bw+10)+bw/2,a2=s.age-.35;if(i>=0&&s.ph==='lost')puff('dust',x,82,Math.min(90,bw*1.1),a2/.5);if(s.ph==='stop'&&a2<1.4)spr('confetti',x0+(s.open-1)*(bw+10)/2+bw/2,60+Math.max(0,a2)*40,90,{rot:a2,a:clamp((1.4-a2)/.4,0,1)});}
   const st=s.ph==='lost'?0:s.open;
   txt(s.age<.35&&s.open?'두근두근…':s.ph==='play'?(s.open?`쌓인 쿠폰 ${st}장 · 더 열까요, 그만할까요?`:'상자 열기를 눌러 시작해요'):s.ph==='lost'?`꽝! 쌓은 쿠폰을 모두 잃고 참가비 ${s.p.fee}장도 잃었어요`:`그만! 쿠폰 ${st}장을 가져가요`,400,160+6*FS,s.age<.35?MC.sub:s.ph==='lost'?MC.red:s.ph==='stop'?MC.green:MC.ink,mob?10:14,true,'center');
   card(16,198,470,266,'계획별 기대값 (몇 개 열고 멈출지 미리 정했을 때)');

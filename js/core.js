@@ -56,10 +56,13 @@ function person(x,y,s=1,pose='cat_throw'){ // y: 발 위치
   if(spr(pose,x,y-62*s,124*s))return;circle(x,y-110*s,14*s,'#fff','#8a5a3c');}
 /* 일러스트 조각 */
 const IMG={};
-['bag','balloon','box_open','bubble','candy_po','candy_ps','candy_ro','candy_rs','car','cat_blow','cat_happy','cat_hello','cat_point','cat_sad','cat_surprise','cat_think','cat_throw','chair','chute','cloud_big','cloud_long','cloud_small','coin_h','coin_t','coupon','coupons','door','door_open','egg','funnel','gift','goat','hotair','jar','lander','pingpong','plane_flat','plane_glider','ring','rocket','slip','sparkle','star','thought']
+['bag', 'ball_b', 'ball_r', 'ball_w', 'ball_y', 'balloon', 'balloon_b', 'balloon_flat', 'balloon_r', 'bell', 'boomerang', 'booth', 'box_open', 'bubble', 'candy_po', 'candy_ps', 'candy_ro', 'candy_rs', 'car', 'cat_blow', 'cat_clap', 'cat_draw', 'cat_flip', 'cat_gift', 'cat_happy', 'cat_hello', 'cat_plane', 'cat_point', 'cat_roll', 'cat_sad', 'cat_spin', 'cat_surprise', 'cat_think', 'cat_throw', 'cat_watch', 'chair', 'chute', 'cloud_big', 'cloud_long', 'cloud_small', 'coin_g0', 'coin_g1', 'coin_g2', 'coin_g3', 'coin_g4', 'coin_g5', 'coin_s0', 'coin_s1', 'coin_s2', 'coin_s3', 'coin_s4', 'coin_s5', 'confetti', 'coupon', 'coupons', 'cup', 'cupplane', 'd6_1', 'd6_2', 'd6_3', 'd6_4', 'd6_5', 'd6_6', 'd6r0', 'd6r1', 'd6r2', 'd6r3', 'd6r4', 'd6r5', 'door', 'door_open', 'dust0', 'dust1', 'dust2', 'egg', 'egg_broken', 'egg_crack', 'fire0', 'fire1', 'fire2', 'funnel', 'gift', 'goat', 'grain0', 'grain1', 'grain2', 'grain3', 'grain4', 'hotair', 'impact', 'jar', 'lander', 'needle', 'pingpong', 'plane_dart', 'plane_flat', 'plane_glide2', 'plane_glider', 'plane_wide', 'poly10', 'poly12', 'poly16', 'poly4', 'poly6', 'poly8', 'polyr10', 'polyr12', 'polyr16', 'polyr4', 'polyr6', 'polyr8', 'ricebowl', 'ring', 'ringplane', 'rocket', 'rubber', 'slip', 'spark0', 'spark1', 'spark2', 'sparkle', 'speech', 'star', 'straw', 'thought', 'tw0', 'tw1', 'tw2', 'tw3', 'tw4', 'wheel_frame', 'wind0', 'wind1', 'wind2']
  .forEach(n=>{const i=new Image();i.src='img/'+n+'.png';IMG[n]=i;});
 function spr(n,x,y,h,o={}){const im=IMG[n];if(!im||!im.complete||!im.naturalWidth)return false;const w=(o.w!=null?o.w:h*im.naturalWidth/im.naturalHeight);
   ctx.save();ctx.translate(x,y);if(o.rot)ctx.rotate(o.rot);ctx.scale((o.flip?-1:1)*(o.sx??1),o.sy??1);if(o.a!=null)ctx.globalAlpha*=o.a;ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true;}
+/* 그림 원래 크기에 배율 k를 곱해 그리기(여러 장면을 같은 크기로) */
+function sprK(n,x,y,k,o){const im=IMG[n];return !!(im&&im.naturalHeight)&&spr(n,x,y,im.naturalHeight*k,o);}
+const NOW=()=>performance.now()/1000;
 /* 던져진 물건이 떨어져 통통 튀는 움직임: age(초), i(순서) → {dy,fl,rot,done} */
 function tumble(age,i=0,dur=0.5){const t=clamp((age-i*0.01)/dur,0,1),q=1-t;return{t,dy:-q*q*110-Math.abs(Math.sin(t*Math.PI*2.5))*q*26,fl:Math.cos(q*Math.PI*3),rot:q*5,done:t>=1};}
 const easeTo=(arr,target,dt,k=9)=>{for(let i=0;i<target.length;i++){if(arr[i]==null)arr[i]=0;arr[i]+=(target[i]-arr[i])*Math.min(1,dt*k);}return arr;};
@@ -73,16 +76,26 @@ function frac(n,d,x,y,size=16,col='#1d2a3a',align='center'){
 const fr=(n,d)=>`<span class="fr"><i>${n}</i><i>${d}</i></span>`;
 const pct=v=>(v*100).toFixed(1)+'%';
 /* 동전·주사위 그림 */
-function drawCoin(x,y,r,head,fl=1){const sy=Math.max(.12,Math.abs(fl));
-  if(r>=6&&spr(head?'coin_h':'coin_t',x,y,2*r,{sy}))return;
-  ctx.save();ctx.translate(x,y);ctx.scale(1,sy);circle(0,0,r,head?'#f6c94a':'#cfd0dc',head?'#b98a2b':'#8f8a99',Math.max(1,r*.14));ctx.restore();}
+function drawCoin(x,y,r,head,fl=1,silver=false){const q=Math.abs(fl);
+  if(r>=6){const f=head?(q>.8?0:q>.45?1:q>.15?2:3):(q>.7?5:q>.15?4:3);if(spr('coin_'+(silver?'s':'g')+f,x,y,2*r))return;}
+  ctx.save();ctx.translate(x,y);ctx.scale(1,Math.max(.12,q));circle(0,0,r,silver?'#dcdbe4':'#f6c94a',silver?'#8f8a99':'#b98a2b',Math.max(1,r*.14));ctx.restore();}
 const PIPS={1:[[0,0]],2:[[-1,-1],[1,1]],3:[[-1,-1],[0,0],[1,1]],4:[[-1,-1],[1,-1],[-1,1],[1,1]],5:[[-1,-1],[1,-1],[0,0],[-1,1],[1,1]],6:[[-1,-1],[1,-1],[-1,0],[1,0],[-1,1],[1,1]]};
-const DIECOL={4:'#e6f6f1',6:'#fffaf2',8:'#e8f3fd',10:'#ffeef0',12:'#f2ecfb',16:'#fff4dd'};
+/* 다면체 주사위 그림에서 숫자를 얹을 면의 가운데(크기 대비)와 글자 크기 */
+const POLY={4:[0,.2,.3],6:[-.07,.08,.38],8:[0,-.14,.27],10:[0,-.04,.27],12:[0,.03,.3],16:[0,-.12,.24]};
 function drawDie(x,y,s,n,faces=6,hl,rot=0){ctx.save();ctx.translate(x,y);if(rot)ctx.rotate(rot);
-  box(-s/2,-s/2,s,s,DIECOL[faces]||'#fffaf2',hl||'#8a5a3c',s*.22,Math.max(1.2,s*.06));
+  if(hl)box(-s*.64,-s*.64,s*1.28,s*1.28,hl+'55',hl,s*.3,Math.max(2,s*.06));
+  const im=faces===6?'d6_'+n:'poly'+faces;
+  if(s>=12&&spr(im,0,0,s*1.1)){if(faces!==6){const o=POLY[faces],fs=s*o[2]*(n>=10?.82:1);ctx.font=`900 ${fs}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#6b4a36';ctx.fillText(n,o[0]*s,o[1]*s+fs*.06);}ctx.restore();return;}
+  box(-s/2,-s/2,s,s,'#fffaf2','#8a5a3c',s*.22,Math.max(1.2,s*.06));
   if(faces===6){PIPS[n].forEach(([a,b])=>circle(a*s*.26,b*s*.26,s*.09,n===1?'#e2636a':'#6b4a36'));}
   else if(s>=9){ctx.font=`900 ${s*.56}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#6b4a36';ctx.fillText(n,0,s*.04);}
   ctx.restore();}
+/* 굴러가는 주사위: ph는 계속 커지는 값(시간×속도) */
+function drawDieRoll(x,y,s,faces,ph){const k=Math.floor(ph*2);
+  const im=faces===6?'d6r'+(k%6):(k%2?'polyr':'poly')+faces;
+  if(s>=12&&spr(im,x,y,s*1.1,{rot:ph*.7}))return;drawDie(x,y,s,(k%faces)+1,faces,null,ph*.7);}
+/* 짧은 효과 그림: 0~1 진행도로 3장 중 하나 */
+function puff(kind,x,y,h,u){if(u<0||u>=1)return;spr(kind+Math.min(2,Math.floor(u*3)),x,y,h,{a:u>.7?(1-u)/.3:1});}
 /* 막대그래프: vals(비율 0~1), expect(기대 비율 배열 또는 값) */
 function barChart(x,y,w,h,o){
   const n=o.vals.length, max=o.max||Math.max(0.0001,...o.vals,...(o.expect||[0]))*1.18, bw=w/n;
