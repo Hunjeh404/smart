@@ -1,4 +1,5 @@
 "use strict";
+const VER='20261117c';
 /* ================== 강의·차시 ================== */
 const COURSES=[
  {id:'sci',name:'하늘을 여는 과학자',lessons:[
@@ -59,7 +60,7 @@ function handCat(px,py,gy,pose='cat_throw'){const h=(gy-py)/0.533;if(!spr(pose,p
 /* 일러스트 조각 */
 const IMG={};
 ['bag', 'ball_b', 'ball_r', 'ball_w', 'ball_y', 'balloon', 'balloon_b', 'balloon_flat', 'balloon_r', 'bell', 'boomerang', 'booth', 'box_open', 'bubble', 'candy_po', 'candy_ps', 'candy_ro', 'candy_rs', 'car', 'cat_blow', 'cat_clap', 'cat_draw', 'cat_flip', 'cat_gift', 'cat_happy', 'cat_hello', 'cat_plane', 'cat_point', 'cat_roll', 'cat_sad', 'cat_spin', 'cat_surprise', 'cat_think', 'cat_throw', 'cat_watch', 'chair', 'chute', 'cloud_big', 'cloud_long', 'cloud_small', 'coin_g0', 'coin_g1', 'coin_g2', 'coin_g3', 'coin_g4', 'coin_g5', 'coin_s0', 'coin_s1', 'coin_s2', 'coin_s3', 'coin_s4', 'coin_s5', 'confetti', 'coupon', 'coupons', 'cup', 'cupplane', 'd6_1', 'd6_2', 'd6_3', 'd6_4', 'd6_5', 'd6_6', 'd6r0', 'd6r1', 'd6r2', 'd6r3', 'd6r4', 'd6r5', 'door', 'door_open', 'dust0', 'dust1', 'dust2', 'egg', 'egg_broken', 'egg_crack', 'fire0', 'fire1', 'fire2', 'funnel', 'gift', 'goat', 'grain0', 'grain1', 'grain2', 'grain3', 'grain4', 'hotair', 'impact', 'jar', 'lander', 'needle', 'pingpong', 'plane_dart', 'plane_flat', 'plane_glide2', 'plane_glider', 'plane_wide', 'poly10', 'poly12', 'poly16', 'poly4', 'poly6', 'poly8', 'polyr10', 'polyr12', 'polyr16', 'polyr4', 'polyr6', 'polyr8', 'ricebowl', 'ring', 'ringplane', 'rocket', 'rubber', 'slip', 'spark0', 'spark1', 'spark2', 'sparkle', 'speech', 'star', 'straw', 'thought', 'tw0', 'tw1', 'tw2', 'tw3', 'tw4', 'wheel_frame', 'wind0', 'wind1', 'wind2']
- .forEach(n=>{const i=new Image();i.src='img/'+n+'.png';IMG[n]=i;});
+ .forEach(n=>{const i=new Image();i.src='img/'+n+'.png?v='+VER;IMG[n]=i;});
 function spr(n,x,y,h,o={}){const im=IMG[n];if(!im||!im.complete||!im.naturalWidth)return false;const w=(o.w!=null?o.w:h*im.naturalWidth/im.naturalHeight);
   ctx.save();ctx.translate(x,y);if(o.rot)ctx.rotate(o.rot);ctx.scale((o.flip?-1:1)*(o.sx??1),o.sy??1);if(o.a!=null)ctx.globalAlpha*=o.a;ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true;}
 /* 그림 원래 크기에 배율 k를 곱해 그리기(여러 장면을 같은 크기로) */
