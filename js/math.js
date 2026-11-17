@@ -1,10 +1,10 @@
 "use strict";
 /* 게임 속 확률 실험 */
-const MC={ink:'#1d2a3a',sub:'#5b6b80',blue:'#2f7fd1',red:'#d9534f',green:'#2e9e6b',gold:'#b88500',bar:'#7fb2ea',line:'#d6e0eb'};
+const MC={ink:'#4a3a2e',sub:'#8a7566',blue:'#3f8fd0',red:'#e2636a',green:'#2fa084',gold:'#b8801a',bar:'#9cc9f0',line:'#ecdccb'};
 const big=v=>v>=10000?fmtN(v/10000)+'만':fmtN(v);
 const comb=(n,k)=>{if(k<0||k>n)return 0;let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return Math.round(r);};
 function card(x,y,w,h,title){box(x,y,w,h,'#fff',MC.line,10);if(title)txt(title,x+12,y+17*Math.min(FS,1.3),MC.sub,12,true);}
-function hbar(x,y,w,h,v,exp,col){box(x,y,w,h,'#e9eef4',null,4);ctx.fillStyle=col;ctx.fillRect(x,y,w*clamp(v,0,1),h);if(exp!=null){const ex=x+w*exp;line(ex,y-5,ex,y+h+5,MC.red,3);}}
+function hbar(x,y,w,h,v,exp,col){box(x,y,w,h,'#f6ece0',null,4);ctx.fillStyle=col;ctx.fillRect(x,y,w*clamp(v,0,1),h);if(exp!=null){const ex=x+w*exp;line(ex,y-5,ex,y+h+5,MC.red,3);}}
 function evDraw(num,den,x,y,size=16,align='center'){
   if(num===0){txt('0 (본전)',x,y,MC.green,size,true,align);return;}
   const col=num<0?MC.red:MC.blue,sg=num<0?'−':'+',w=tw(sg,size,true);
@@ -19,7 +19,7 @@ function histChart(x,y,w,h,hist,n,ev,ylabel){
   const end=hist.length?hist[hist.length-1][1]:0,exp=n*ev;let lo=Math.min(0,exp,end),hi=Math.max(0,exp,end);
   hist.forEach(p=>{lo=Math.min(lo,p[1]);hi=Math.max(hi,p[1]);});if(hi-lo<4){hi+=2;lo-=2;}const pad=(hi-lo)*.1;lo-=pad;hi+=pad;
   const Y=v=>gy+gh-(v-lo)/(hi-lo)*gh,X=k=>gx+(n?k/n:0)*gw;
-  line(gx,Y(0),gx+gw,Y(0),'#8a97a8',1.5);txt('0',gx-6,Y(0),MC.sub,11,true,'right');
+  line(gx,Y(0),gx+gw,Y(0),'#b9a898',1.5);txt('0',gx-6,Y(0),MC.sub,11,true,'right');
   if(n){line(X(0),Y(0),X(n),Y(exp),MC.red,2.5,[6,5]);
     ctx.strokeStyle=MC.blue;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(X(0),Y(0));hist.forEach(p=>ctx.lineTo(X(p[0]),Y(p[1])));ctx.stroke();
     txt((end>0?'+':'')+fmtN(end),gx+gw,clamp(Y(end)-11*FS,gy,gy+gh),MC.blue,12,true,'right');}
@@ -37,27 +37,29 @@ EX.push({course:'math',id:'toss',lesson:1,name:'동전·주사위 던지기',siz
   {type:'range',key:'n',label:'한 번에 던질 개수',vals:[1,2,3,5,10,30,100,1000,10000,100000,1000000],val:10,fmt:v=>big(v)+'개',wide:true}],
  buttons:[{label:'던지기',act:'go'},{label:'기록 지우기',act:'clear',ghost:true}],
  K(s){return s.p.kind==='coin'?2:s.p.faces;},
- reset(s){s.cnt=new Array(this.K(s)).fill(0);s.total=0;s.queue=0;s.per=0;s.round=0;s.rounds=0;s.timer=0;s.sample=[];s.age=1;},
+ reset(s){s.cnt=new Array(this.K(s)).fill(0);s.total=0;s.queue=0;s.per=0;s.round=0;s.rounds=0;s.timer=0;s.sample=[];s.age=1;s.disp=[];},
  param(s,k){if(k!=='n')this.reset(s);},
  act(s,a){if(a==='clear')this.reset(s);
   if(a==='go'&&s.queue===0){const n=s.p.n;s.rounds=n>30?10:1;s.per=n/s.rounds;s.queue=s.rounds;s.round=0;s.timer=0;}},
  throwOnce(s){const K=this.K(s),n=s.per,c=new Array(K).fill(0),cap=Math.min(n,60);s.sample=[];
   for(let i=0;i<n;i++){const v=rint(K);c[v]++;if(i<cap)s.sample.push(v);}
   for(let i=0;i<K;i++)s.cnt[i]+=c[i];s.total+=n;s.round++;s.queue--;s.age=0;},
- step(s,dt){s.age+=dt;if(s.queue>0){s.timer-=dt;if(s.timer<=0){this.throwOnce(s);s.timer=0.45;}}},
+ step(s,dt){s.age+=dt;if(s.queue>0){s.timer-=dt;if(s.timer<=0){this.throwOnce(s);s.timer=0.75;}}
+  easeTo(s.disp,s.cnt.map(c=>s.total?c/s.total:0),dt,s.age>0.45?9:0);},
  dev(s){const K=this.K(s);let d=0;s.cnt.forEach(c=>d=Math.max(d,Math.abs(c/s.total-1/K)));return d;},
  draw(s){paper();const K=this.K(s),coin=s.p.kind==='coin',mob=FS>1.3;
-  const tx=16,ty=16,tW=372,tH=300;box(tx,ty,tW,tH,'#fdf6e9','#e2d3b5',10);
+  const tx=16,ty=16,tW=372,tH=300;box(tx,ty,tW,tH,'#fff4e2','#e2c9a6',14,2);
   const m=s.sample.length;
   if(!m)txt('던지기를 눌러 보세요',tx+tW/2,ty+tH/2,MC.sub,15,true,'center');
   else{const cols=Math.ceil(Math.sqrt(m*(tW-20)/(tH-60))),rows=Math.ceil(m/cols),cell=Math.min((tW-20)/cols,(tH-60)/rows),sz=Math.min(cell*.8,72),pop=clamp(s.age/0.18,0,1);
    const ox=tx+(tW-cols*cell)/2+cell/2,oy=ty+26+((tH-60)-rows*cell)/2+cell/2;
-   s.sample.forEach((v,i)=>{const x=ox+(i%cols)*cell,y=oy+Math.floor(i/cols)*cell,z=sz*(0.6+0.4*pop);coin?drawCoin(x,y,z/2,v===0):drawDie(x,y,z,v+1,K);});
+   ctx.save();ctx.beginPath();ctx.rect(tx+2,ty+2,tW-4,tH-4);ctx.clip();s.sample.forEach((v,i)=>{const x=ox+(i%cols)*cell,y=oy+Math.floor(i/cols)*cell,m2=tumble(s.age,i);
+    coin?drawCoin(x,y+m2.dy,sz/2,m2.done?v===0:m2.fl>0,m2.done?1:m2.fl):drawDie(x,y+m2.dy,sz,m2.done?v+1:(i*7+Math.floor(s.age*18))%K+1,K,null,m2.rot);});ctx.restore();
    txt(s.per>m?`이번에 던진 ${fmtN(s.per)}개 중 ${m}개만 보여 줘요`:`이번에 던진 ${m}개`,tx+tW/2,ty+tH-15,MC.sub,12,true,'center');}
   if(s.rounds>1&&s.round>0)txt(`${s.round} / ${s.rounds}회째 자동으로 던지는 중`.replace(s.queue?'':' 자동으로 던지는 중',''),tx+12,ty+16,MC.red,12,true);
   const gx=404,gy=16,gw=380,gh=300;card(gx,gy,gw,gh,'지금까지 나온 비율');
   if(!mob){line(gx+gw-112,gy+17,gx+gw-90,gy+17,MC.red,2.5);txt('계산한 확률',gx+gw-84,gy+17,MC.red,11,true);}
-  const labels=coin?['앞면','뒷면']:Array.from({length:K},(_,i)=>i+1),vals=s.cnt.map(c=>s.total?c/s.total:0);
+  const labels=coin?['앞면 (별)','뒷면 (구름)']:Array.from({length:K},(_,i)=>i+1),vals=s.disp.length===K?s.disp:s.cnt.map(()=>0);
   barChart(gx+20,gy+62,gw-40,gh-100,{vals,expect:new Array(K).fill(1/K),labels,max:Math.max(1.7/K,...vals)*1.08,cols:coin?['#f6c94a','#aab4bf']:null,tops:s.total&&K<=6?s.cnt.map(c=>fmtN(c)):null});
   card(16,332,768,132);
   txt('지금까지 던진 개수',32,356,MC.sub,12,true);txt(fmtN(s.total)+'개',32,356+34*Math.min(FS,1.4),MC.ink,mob?18:26,true);
@@ -82,35 +84,35 @@ EX.push({course:'math',id:'group',lesson:1,name:'묶어서 던지기',size:[800,
  buttons:[{label:'던지기',act:'go'},{label:'기록 지우기',act:'clear',ghost:true}],
  cfg(s){const w=s.p.what;if(w==='d2'){const f=s.p.faces,ways=[];for(let t=2;t<=2*f;t++)ways.push(f-Math.abs(f+1-t));return{dice:true,f,k:2,ways,total:f*f,label:i=>''+(i+2),unit:'합 '};}
   const k=+w[1],ways=[];for(let i=0;i<=k;i++)ways.push(comb(k,i));return{dice:false,k,ways,total:1<<k,label:i=>i+'개',unit:'앞면 '};},
- reset(s){const c=this.cfg(s);s.cnt=new Array(c.ways.length).fill(0);s.total=0;s.last=null;s.age=1;},
+ reset(s){const c=this.cfg(s);s.cnt=new Array(c.ways.length).fill(0);s.total=0;s.last=null;s.age=1;s.disp=[];},
  param(s,k){if(k!=='n')this.reset(s);},
  act(s,a){if(a==='clear')return this.reset(s);const c=this.cfg(s);let last;
   for(let i=0;i<s.p.n;i++){if(c.dice){const d1=rint(c.f)+1,d2=rint(c.f)+1;s.cnt[d1+d2-2]++;last=[d1,d2];}
    else{let h=0;last=[];for(let j=0;j<c.k;j++){const v=Math.random()<.5;last.push(v);if(v)h++;}s.cnt[h]++;}}
   s.total+=s.p.n;s.last=last;s.age=0;},
- step(s,dt){s.age+=dt;},
+ step(s,dt){s.age+=dt;easeTo(s.disp,s.cnt.map(v=>s.total?v/s.total:0),dt,s.age>0.45?9:0);},
  out(s,c){return !s.last?-1:c.dice?s.last[0]+s.last[1]-2:s.last.filter(Boolean).length;},
  draw(s){paper();const c=this.cfg(s),lo=this.out(s,c),mob=FS>1.3;
   card(16,16,372,448,`일어날 수 있는 모든 경우: ${c.total}가지`);
   if(c.dice){const f=c.f,cell=Math.min(40,300/f),ox=16+(372-cell*(f+1))/2+cell,oy=118;
-   txt('방금 나온 눈',34,66,MC.sub,12,true);if(s.last){drawDie(160,64,40,s.last[0],f);drawDie(210,64,40,s.last[1],f);txt('합 '+(lo+2),245,64,MC.red,17,true);}
+   txt('방금 나온 눈',34,66,MC.sub,12,true);if(s.last){[0,1].forEach(j=>{const m2=tumble(s.age,j*8,.45);drawDie(160+j*50,64+m2.dy*.5,40,m2.done?s.last[j]:rint(f)+1,f,null,m2.rot);});if(s.age>.5)txt('합 '+(lo+2),245,64,MC.red,17,true);}
    for(let i=1;i<=f;i++){txt(i,ox+(i-.5)*cell,oy-12,MC.sub,11,true,'center');txt(i,ox-12,oy+(i-.5)*cell,MC.sub,11,true,'center');}
-   for(let a=1;a<=f;a++)for(let b=1;b<=f;b++){const t=a+b,x=ox+(b-1)*cell,y=oy+(a-1)*cell,hit=s.last&&s.last[0]===a&&s.last[1]===b,same=lo>=0&&t===lo+2;
+   for(let a=1;a<=f;a++)for(let b=1;b<=f;b++){const t=a+b,x=ox+(b-1)*cell,y=oy+(a-1)*cell,hit=s.last&&s.age>.5&&s.last[0]===a&&s.last[1]===b,same=lo>=0&&s.age>.5&&t===lo+2;
      ctx.fillStyle=hit?'#f9b8b2':same?'#ffe5e2':'#fff';ctx.fillRect(x,y,cell,cell);ctx.strokeStyle='#c9d6e5';ctx.lineWidth=1;ctx.strokeRect(x,y,cell,cell);
      ctx.font=`${same?900:500} ${cell*.42}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=same?MC.red:MC.ink;ctx.fillText(t,x+cell/2,y+cell/2+1);}
    if(!mob)txt('세로: 첫째 주사위 · 가로: 둘째 주사위 · 칸 속 숫자: 두 눈의 합',202,oy+f*cell+20,MC.sub,11,false,'center');
   }else{const k=c.k,colW=340/(k+1),r=Math.min(11,(colW-12)/(2*k)-1);
-   txt('방금 던진 결과',34,66,MC.sub,12,true);if(s.last){s.last.forEach((v,j)=>drawCoin(170+j*42,64,17,v));txt('앞면 '+lo+'개',170+k*42,64,MC.red,15,true);}
+   txt('방금 던진 결과',34,66,MC.sub,12,true);if(s.last){s.last.forEach((v,j)=>{const m2=tumble(s.age,j*6,.45);drawCoin(170+j*42,64+m2.dy*.45,17,m2.done?v:m2.fl>0,m2.done?1:m2.fl);});if(s.age>.5)txt('앞면 '+lo+'개',170+k*42,64,MC.red,15,true);}
    for(let h=0;h<=k;h++){const cx=32+colW*(h+.5);txt('앞면 '+h+'개',cx,112,h===lo?MC.red:MC.sub,mob?9:12,true,'center');let row=0;
      for(let mask=0;mask<(1<<k);mask++){const bits=[];let cnt=0;for(let j=0;j<k;j++){const v=!!(mask>>(k-1-j)&1);bits.push(v);if(v)cnt++;}if(cnt!==h)continue;
-       const y=140+row*(2*r+14),hit=s.last&&bits.every((v,j)=>v===s.last[j]);
+       const y=140+row*(2*r+14),hit=s.last&&s.age>.5&&bits.every((v,j)=>v===s.last[j]);
        box(cx-k*(r+1)-4,y-r-4,2*k*(r+1)+8,2*r+8,hit?'#ffe5e2':'#f6f8fb',hit?MC.red:null,6,2.5);
        bits.forEach((v,j)=>drawCoin(cx-(k-1)*(r+1)+j*2*(r+1),y,r,v));row++;}
      txt(c.ways[h]+'가지',cx,140+row*(2*r+14)+4,MC.ink,mob?9:12,true,'center');}
    if(!mob)txt('순서가 다르면 다른 경우로 세요: (앞, 뒤)와 (뒤, 앞)',202,444,MC.sub,11,false,'center');}
   card(404,16,380,448,'계산한 확률(빨간 선)과 실험 결과(막대)');
-  const vals=s.cnt.map(v=>s.total?v/s.total:0),exp=c.ways.map(w=>w/c.total);
-  barChart(424,70,340,300,{vals,expect:exp,labels:c.ways.map((_,i)=>c.label(i)),max:Math.max(...exp,...vals)*1.15,cols:c.ways.map((_,i)=>i===lo?'#f08a80':MC.bar),tops:c.ways.length<=7?c.ways.map(w=>w+'/'+c.total):null});
+  const vals=s.disp.length===c.ways.length?s.disp:c.ways.map(()=>0),exp=c.ways.map(w=>w/c.total);
+  barChart(424,70,340,300,{vals,expect:exp,labels:c.ways.map((_,i)=>c.label(i)),max:Math.max(...exp,...vals)*1.15,cols:c.ways.map((_,i)=>i===lo&&s.age>.5?'#f3a0a4':MC.bar),tops:c.ways.length<=7?c.ways.map(w=>w+'/'+c.total):null});
   txt(c.unit.trim()+(c.dice?'':' 개수'),594,400,MC.sub,12,true,'center');
   txt(s.total?`${fmtN(s.total)}번 던졌어요`:'던지기를 눌러 보세요',594,436,MC.ink,14,true,'center');
  },
@@ -129,16 +131,17 @@ EX.push({course:'math',id:'hint',lesson:2,name:'힌트를 들으면',size:[800,4
   {type:'seg',key:'hint',label:'친구의 힌트',opts:[['none','힌트 없음'],['even','짝수야'],['odd','홀수야'],['big','절반보다 커'],['small','절반 이하야']],val:'none'}],
  buttons:[{label:'1번 굴리기',act:'r1'},{label:'1000번 굴리기',act:'r1000'},{label:'기록 지우기',act:'clear',ghost:true}],
  ok(s,v){const h=s.p.hint,f=s.p.faces;return h==='none'||(h==='even'&&v%2===0)||(h==='odd'&&v%2===1)||(h==='big'&&v>f/2)||(h==='small'&&v<=f/2);},
- reset(s){if(!s.tg)s.tg=2;s.tg=Math.min(s.tg,s.p.faces);s.n=0;s.m=0;s.k=0;s.last=0;},
+ reset(s){if(!s.tg)s.tg=2;s.tg=Math.min(s.tg,s.p.faces);s.n=0;s.m=0;s.k=0;s.last=0;s.age=9;s.t=0;},
  param(s){this.reset(s);},
- act(s,a){if(a==='clear')return this.reset(s);const t=a==='r1'?1:1000;for(let i=0;i<t;i++){const v=rint(s.p.faces)+1;s.n++;s.last=v;if(this.ok(s,v)){s.m++;if(v===s.tg)s.k++;}}},
- step(){},
+ act(s,a){if(a==='clear')return this.reset(s);const t=a==='r1'?1:1000;for(let i=0;i<t;i++){const v=rint(s.p.faces)+1;s.n++;s.last=v;if(this.ok(s,v)){s.m++;if(v===s.tg)s.k++;}}s.age=0;},
+ step(s,dt){s.age+=dt;s.t+=dt;},
  geo(s){const f=s.p.faces,sz=Math.min(74,740/f-12),gap=(768-f*sz)/(f+1);return{f,sz,x:i=>16+gap+(i-1)*(sz+gap)+sz/2,y:96};},
  click(s,x,y){const g=this.geo(s);for(let i=1;i<=g.f;i++)if(Math.abs(x-g.x(i))<g.sz/2+6&&Math.abs(y-g.y)<g.sz/2+14){s.tg=i;s.n=s.m=s.k=0;s.last=0;}},
  left(s){const a=[];for(let v=1;v<=s.p.faces;v++)if(this.ok(s,v))a.push(v);return a;},
  draw(s){paper();const g=this.geo(s),L=this.left(s),mob=FS>1.3,hn={none:'힌트 없음',even:'“짝수야!”',odd:'“홀수야!”',big:'“절반보다 큰 수야!”',small:'“절반 이하인 수야!”'}[s.p.hint];
   card(16,16,768,160,`친구의 힌트: ${hn}  ·  맞히려는 수는 주사위를 눌러서 골라요`);
-  for(let i=1;i<=g.f;i++){const x=g.x(i),ok=this.ok(s,i);ctx.globalAlpha=ok?1:.3;drawDie(x,g.y,g.sz,i,g.f,i===s.last?MC.gold:null);ctx.globalAlpha=1;
+  for(let i=1;i<=g.f;i++){const x=g.x(i),ok=this.ok(s,i);const rolling=s.age<.7,lit=rolling?(Math.floor(s.age*16)%g.f)+1===i:i===s.last,hop=lit&&!rolling?-Math.abs(Math.sin(clamp((s.age-.7)/.4,0,1)*Math.PI))*14:0;
+   ctx.globalAlpha=ok?1:.3;drawDie(x,g.y+hop,g.sz,i,g.f,lit?'#e0a326':null,lit&&rolling?Math.sin(s.t*30)*.12:0);ctx.globalAlpha=1;
    if(!ok)line(x-g.sz*.55,g.y-g.sz*.55,x+g.sz*.55,g.y+g.sz*.55,MC.red,4);
    if(i===s.tg){circle(x,g.y,g.sz*.72,null,MC.blue,3.5);if(!mob)txt('맞히려는 수',x,g.y+g.sz*.72+14,MC.blue,11,true,'center');}}
   const hit=L.includes(s.tg)?1:0;
@@ -152,7 +155,7 @@ EX.push({course:'math',id:'hint',lesson:2,name:'힌트를 들으면',size:[800,4
   txt(s.p.hint==='none'?'':`힌트와 맞는 경우 ${fmtN(s.m)}번만 세요`,426,232+24*FS,MC.sub,12,true);
   hbar(426,300,338,26,s.m?s.k/s.m:0,L.length?hit/L.length:0,MC.bar);
   txt(s.m?`그중 ${s.tg}: ${fmtN(s.k)}번 (${pct(s.k/s.m)})`:'굴리기를 눌러 보세요',426,350,MC.blue,14,true);
-  if(s.last&&!mob)txt(`방금 나온 눈: ${s.last}`+(this.ok(s,s.last)?'':' (힌트와 달라서 세지 않아요)'),426,392,MC.gold,13,true);
+  if(s.last&&!mob&&s.age>.7)txt(`방금 나온 눈: ${s.last}`+(this.ok(s,s.last)?'':' (힌트와 달라서 세지 않아요)'),426,392,MC.gold,13,true);
  },
  now(s){const L=this.left(s),f=s.p.faces,hit=L.includes(s.tg);if(s.p.hint==='none')return `힌트가 없으면 ${f}가지가 모두 가능해요. ${s.tg}일 확률은 ${fr(1,f)}이에요. 힌트를 골라 보세요.`;
   if(!hit)return `힌트 때문에 ${s.tg}은(는) <b>나올 수 없는 수</b>가 됐어요. 확률은 0이에요.`;
@@ -169,17 +172,17 @@ EX.push({course:'math',id:'candy',lesson:2,name:'사탕 뽑기',size:[800,440],
  buttons:[{label:'1개 뽑기',act:'p1'},{label:'100번 뽑기',act:'p100'},{label:'기록 지우기',act:'clear',ghost:true}],
  list(s){const a=[];const add=(n,sh,fl)=>{for(let i=0;i<n;i++)a.push({sh,fl});};add(s.p.so,'o','s');add(s.p.ss,'s','s');add(s.p.go,'o','g');add(s.p.gs,'s','g');return a;},
  elig(s){return this.list(s).map((c,i)=>({...c,i})).filter(c=>s.p.pick==='any'||c.sh===s.p.pick);},
- reset(s){s.n=0;s.g=0;s.last=-1;},
+ reset(s){s.n=0;s.g=0;s.last=-1;s.age=9;},
  param(s){this.reset(s);},
- act(s,a){if(a==='clear')return this.reset(s);const E=this.elig(s);if(!E.length)return;const t=a==='p1'?1:100;for(let i=0;i<t;i++){const c=E[rint(E.length)];s.n++;if(c.fl==='g')s.g++;s.last=c.i;}},
- step(){},
+ act(s,a){if(a==='clear')return this.reset(s);s.age=0;const E=this.elig(s);if(!E.length)return;const t=a==='p1'?1:100;for(let i=0;i<t;i++){const c=E[rint(E.length)];s.n++;if(c.fl==='g')s.g++;s.last=c.i;}},
+ step(s,dt){s.age+=dt;},
  draw(s){paper();const A=this.list(s),E=this.elig(s),ge=E.filter(c=>c.fl==='g').length,mob=FS>1.3;
   card(16,16,340,408,'유리병 (뽑은 사탕은 다시 넣어요)');
-  box(46,56,280,320,'#f4f8fc','#b9c7d8',26,3);
-  const cols=5,cell=50;A.forEach((c,i)=>{const x=86+(i%cols)*cell,y=100+Math.floor(i/cols)*58,ok=s.p.pick==='any'||c.sh===s.p.pick,col=c.fl==='s'?'#ef5b6b':'#8a5cc7';
-    ctx.globalAlpha=ok?1:.2;c.sh==='o'?circle(x,y,17,col):star(x,y,17,col);ctx.globalAlpha=1;if(i===s.last)circle(x,y,26,null,MC.gold,3.5);});
+  if(!spr('jar',186,216,330,{w:300,a:.9}))box(46,56,280,320,'#f4f8fc','#b9c7d8',26,3);
+  const cols=5,cell=44,rows=Math.ceil(A.length/cols);A.forEach((c,i)=>{const pk=i===s.last,u=pk?clamp(s.age/.9,0,1):1,lift=pk?Math.sin(u*Math.PI)*150:0,x=98+(i%cols)*cell,y=330-(rows-1-Math.floor(i/cols))*46-lift,ok=s.p.pick==='any'||c.sh===s.p.pick,col=c.fl==='s'?'#ef5b6b':'#8a5cc7',z=38*(pk?1+Math.sin(u*Math.PI)*.5:1);
+    ctx.globalAlpha=ok?1:.22;if(!spr('candy_'+(c.fl==='s'?'r':'p')+c.sh,x,y,z)){c.sh==='o'?circle(x,y,17,col):star(x,y,17,col);}ctx.globalAlpha=1;if(pk&&u>=1)circle(x,y,25,null,'#e0a326',3.5);});
   if(!A.length)txt('사탕이 없어요',186,220,MC.sub,14,true,'center');
-  txt('빨강 = 딸기맛 · 보라 = 포도맛',186,400,MC.sub,11,true,'center');
+  txt('빨강 = 딸기맛 · 보라 = 포도맛',186,404,MC.sub,11,true,'center');
   card(368,16,416,190,'표로 정리하기');
   const tx=[470,580,690],ty=[70,104,138,172];txt('동그라미',tx[1],ty[0],MC.sub,12,true,'center');txt('별',tx[2],ty[0],MC.sub,12,true,'center');
   [['딸기맛',s.p.so,s.p.ss],['포도맛',s.p.go,s.p.gs],['합계',s.p.so+s.p.go,s.p.ss+s.p.gs]].forEach((r,i)=>{txt(r[0],tx[0]-60,ty[i+1],i===1?'#8a5cc7':MC.ink,13,true);
@@ -205,19 +208,18 @@ EX.push({course:'math',id:'lots',lesson:2,name:'제비뽑기',size:[800,440],
  controls:[{type:'range',key:'w',label:'당첨 제비',min:1,max:5,step:1,val:2,fmt:v=>v+'개'},{type:'range',key:'l',label:'꽝 제비',min:1,max:8,step:1,val:4,fmt:v=>v+'개'},
   {type:'seg',key:'mode',label:'뽑은 제비는',opts:[['back','다시 넣는다'],['keep','다시 넣지 않는다']],val:'keep'}],
  buttons:[{label:'제비 뽑기',act:'draw'},{label:'처음부터',act:'again',ghost:true},{label:'1000번 실험',act:'sim'}],
- reset(s){s.w=s.p.w;s.l=s.p.l;s.drawn=[];s.sim=null;},
+ reset(s){s.w=s.p.w;s.l=s.p.l;s.drawn=[];s.sim=null;s.age=9;},
  param(s){this.reset(s);},
  act(s,a){if(a==='again'){s.w=s.p.w;s.l=s.p.l;s.drawn=[];}
-  if(a==='draw'&&s.w+s.l>0&&s.drawn.length<12){const win=Math.random()<s.w/(s.w+s.l);s.drawn.push(win);if(s.p.mode==='keep'){win?s.w--:s.l--;}}
+  if(a==='draw'&&s.w+s.l>0&&s.drawn.length<12){const win=Math.random()<s.w/(s.w+s.l);s.drawn.push(win);s.age=0;if(s.p.mode==='keep'){win?s.w--:s.l--;}}
   if(a==='sim'){let F=0,S=0;for(let i=0;i<1000;i++){let w=s.p.w,l=s.p.l;if(Math.random()<w/(w+l))continue;F++;if(s.p.mode==='keep')l--;if(Math.random()<w/(w+l))S++;}s.sim={F,S};}},
- step(){},
- slip(x,y,win,a=1){ctx.globalAlpha=a;box(x-24,y-15,48,30,win?'#f2b32c':'#cfd6de',null,4);txt(win?'당첨':'꽝',x,y,win?'#5a4300':'#4a5563',12/Math.max(1,FS*.8),true,'center');ctx.globalAlpha=1;},
+ step(s,dt){s.age+=dt;},
+ slip(x,y,win,a=1){ctx.globalAlpha=a;if(!spr('slip',x,y,34,{w:52}))box(x-24,y-15,48,30,'#fff4e2','#b98d6f',4);box(x-19,y-9,34,17,win?'#ffd76a':'#e3dbd2',null,4);txt(win?'당첨':'꽝',x-2,y,win?'#6b4a00':'#6b5a4e',11/Math.max(1,FS*.8),true,'center');ctx.globalAlpha=1;},
  draw(s){paper();const mob=FS>1.3,T0=s.p.w+s.p.l,T=s.w+s.l,keep=s.p.mode==='keep';
   card(16,16,300,408,'주머니 속 제비');
-  ctx.fillStyle='#f3e6d3';ctx.strokeStyle='#b58a52';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(56,90);ctx.quadraticCurveTo(30,400,166,400);ctx.quadraticCurveTo(302,400,276,90);ctx.closePath();ctx.fill();ctx.stroke();
-  line(70,84,262,84,'#b58a52',7);
+  if(!spr('bag',166,236,330,{w:290})){ctx.fillStyle='#f3e6d3';ctx.strokeStyle='#b58a52';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(56,90);ctx.quadraticCurveTo(30,400,166,400);ctx.quadraticCurveTo(302,400,276,90);ctx.closePath();ctx.fill();ctx.stroke();}
   const A=[];for(let i=0;i<s.w;i++)A.push(true);for(let i=0;i<s.l;i++)A.push(false);
-  A.forEach((v,i)=>this.slip(98+(i%3)*68,140+Math.floor(i/3)*46,v));
+  A.forEach((v,i)=>this.slip(112+(i%3)*56,200+Math.floor(i/3)*40,v));
   if(!T)txt('제비를 다 뽑았어요',166,230,MC.sub,14,true,'center');
   card(328,16,456,150,'지금 뽑으면 당첨될 확률');
   txt('처음',358,84,MC.sub,13,true);frac(s.p.w,T0,420,84,22,MC.ink);
@@ -225,7 +227,7 @@ EX.push({course:'math',id:'lots',lesson:2,name:'제비뽑기',size:[800,440],
   if(!mob)txt(!s.drawn.length?'':ch?'달라졌어요':'그대로예요',640,84,ch?MC.red:MC.green,15,true);
   txt(keep?`주머니에 남은 제비: 당첨 ${s.w}개, 꽝 ${s.l}개`:'뽑은 제비를 다시 넣어서 주머니 속은 늘 처음과 같아요',348,144,MC.sub,12,true);
   card(328,178,456,110,'뽑은 순서');
-  s.drawn.forEach((v,i)=>this.slip(366+(i%8)*54,228+Math.floor(i/8)*34,v));
+  s.drawn.forEach((v,i)=>{const tx2=366+(i%8)*54,ty2=228+Math.floor(i/8)*34,u=i===s.drawn.length-1?clamp(s.age/.5,0,1):1,e=1-(1-u)*(1-u);this.slip(lerp(166,tx2,e),lerp(150,ty2,e)-Math.sin(u*Math.PI)*60,v);});
   if(!s.drawn.length)txt('제비 뽑기를 눌러 보세요',348,238,MC.sub,13,true);
   card(328,300,456,124,'1000번 실험: 첫 번째가 꽝이었을 때, 두 번째 당첨 비율');
   const ex=keep?s.p.w/(T0-1):s.p.w/T0;hbar(348,350,416,22,s.sim&&s.sim.F?s.sim.S/s.sim.F:0,ex,MC.bar);
@@ -244,20 +246,20 @@ EX.push({course:'math',id:'streak',lesson:2,name:'연속 앞면 다음엔?',size
  controls:[{type:'range',key:'k',label:'연속으로 나온 앞면',min:2,max:8,step:1,val:4,fmt:v=>v+'번'},
   {type:'range',key:'n',label:'던질 횟수',vals:[100,1000,10000,100000,1000000],val:1000,fmt:v=>big(v)+'번'}],
  buttons:[{label:'던지기',act:'go'},{label:'기록 지우기',act:'clear',ghost:true}],
- reset(s){s.n=0;s.run=0;s.cond=0;s.hit=0;s.blocks=0;s.ball=0;s.bi=0;s.bok=true;s.tail=[];},
+ reset(s){s.n=0;s.run=0;s.cond=0;s.hit=0;s.blocks=0;s.ball=0;s.bi=0;s.bok=true;s.tail=[];s.age=9;},
  param(s,k){if(k==='k')this.reset(s);},
  act(s,a){if(a==='clear')return this.reset(s);const k=s.p.k;
   for(let i=0;i<s.p.n;i++){const h=Math.random()<.5;if(s.run>=k){s.cond++;if(h)s.hit++;}s.run=h?s.run+1:0;
    s.bok=s.bok&&h;s.bi++;if(s.bi===k+1){s.blocks++;if(s.bok)s.ball++;s.bi=0;s.bok=true;}
    s.n++;if(i>=s.p.n-40)s.tail.push(h);}
-  s.tail=s.tail.slice(-40);},
- step(){},
+  s.tail=s.tail.slice(-40);s.age=0;},
+ step(s,dt){s.age+=dt;},
  draw(s){paper();const k=s.p.k,mob=FS>1.3;
   card(16,16,768,112,'방금 던진 마지막 동전들 (왼쪽 → 오른쪽 순서)');
   const T=s.tail,r=8.5,x0=30;let mark=-1;for(let i=T.length-1;i>=k;i--){let ok=true;for(let j=1;j<=k;j++)if(!T[i-j]){ok=false;break;}if(ok){mark=i;break;}}
-  if(mark>=0){box(x0+(mark-k)*18.6-2,62,k*18.6+2,34,'#fff4d6',MC.gold,6,2);}
-  T.forEach((h,i)=>drawCoin(x0+i*18.6+r,79,r,h));
-  if(mark>=0){circle(x0+mark*18.6+r,79,r+5,null,MC.blue,3);if(!mob)txt(`앞면 ${k}번 연속 → 그다음 동전`,clamp(x0+mark*18.6,150,640),112,MC.blue,11,true,'center');}
+  const shown=s.age>T.length*.02+.3;if(mark>=0&&shown){box(x0+(mark-k)*18.6-2,62,k*18.6+2,34,'#fff4d6',MC.gold,6,2);}
+  T.forEach((h,i)=>{const m2=tumble(s.age,i*2,.3);if(m2.t>0)drawCoin(x0+i*18.6+r,79+m2.dy*.25,r,m2.done?h:m2.fl>0,m2.done?1:m2.fl);});
+  if(mark>=0&&shown){circle(x0+mark*18.6+r,79,r+5,null,MC.blue,3);if(!mob)txt(`앞면 ${k}번 연속 → 그다음 동전`,clamp(x0+mark*18.6,150,640),112,MC.blue,11,true,'center');}
   if(!T.length)txt('던지기를 눌러 보세요',400,80,MC.sub,14,true,'center');
   const P=(x,title,l1,num,den,val,cnt,expv)=>{card(x,140,378,284,title);txt(l1,x+20,196,MC.ink,13,true);txt('계산',x+20,246,MC.sub,12,true);frac(num,den,x+90,246,mob?18:26,MC.red);
     txt('실험',x+20,312,MC.sub,12,true);hbar(x+70,300,288,24,val,expv,MC.bar);txt(cnt,x+20,358,MC.blue,13,true);};
@@ -281,25 +283,26 @@ EX.push({course:'math',id:'lln',lesson:3,name:'큰 수의 법칙',size:[800,480]
  buttons:[{label:'+1번',act:'a1'},{label:'+10번',act:'a10'},{label:'+100번',act:'a100'},{label:'100만 번까지 자동',act:'auto'},{label:'새 줄로 다시',act:'new',ghost:true},{label:'모두 지우기',act:'clear',ghost:true}],
  p0(s){return s.p.kind==='coin'?.5:1/s.p.faces;},
  fresh(){return{n:0,k:0,pts:[],next:1,snap:[]};},
- reset(s){s.runs=[this.fresh()];s.auto=false;},
+ reset(s){s.runs=[this.fresh()];s.auto=false;s.t=0;s.age=9;},
  param(s){this.reset(s);},
  add(s,m){const R=s.runs[s.runs.length-1],p=this.p0(s);m=Math.min(m,1e6-R.n);
   for(let i=0;i<m;i++){R.n++;if(Math.random()<p)R.k++;if(R.n>=R.next){R.pts.push([Math.log10(R.n)/6,R.k/R.n]);R.next=R.n<150?R.n+1:R.n*1.03;}
    if(R.n===10||R.n===100||R.n===1000||R.n===10000||R.n===100000||R.n===1000000)R.snap.push([R.n,R.k]);}
   if(m>0&&R.pts.length&&R.pts[R.pts.length-1][0]!==Math.log10(R.n)/6)R.pts.push([Math.log10(R.n)/6,R.k/R.n]);},
  act(s,a){if(a==='clear')return this.reset(s);if(a==='new'){s.auto=false;if(s.runs[s.runs.length-1].n){s.runs.push(this.fresh());if(s.runs.length>5)s.runs.shift();}return;}
-  if(a==='auto'){s.auto=!s.auto;return;}s.auto=false;this.add(s,{a1:1,a10:10,a100:100}[a]);},
- step(s){if(s.auto){const R=s.runs[s.runs.length-1];if(R.n>=1e6){s.auto=false;return;}this.add(s,Math.max(1,Math.ceil(R.n*0.05)));}},
+  if(a==='auto'){s.auto=!s.auto;return;}s.auto=false;s.age=0;this.add(s,{a1:1,a10:10,a100:100}[a]);},
+ step(s,dt){s.t+=dt;s.age+=dt;if(s.auto){const R=s.runs[s.runs.length-1];if(R.n>=1e6){s.auto=false;return;}this.add(s,Math.max(1,Math.ceil(R.n*0.05)));}},
  draw(s){paper();const p=this.p0(s),R=s.runs[s.runs.length-1],mob=FS>1.3,coin=s.p.kind==='coin',what=coin?'앞면':'1의 눈';
   card(16,16,768,322,`던진 횟수가 늘어날 때 ${what}이 나온 비율`);
   const gx=70,gy=60,gw=690,gh=226,ymax=coin?1:Math.min(1,p*3.2);
-  for(let e=0;e<=6;e++){const x=gx+gw*e/6;line(x,gy,x,gy+gh,'#eef2f6',1.5);txt(['1','10','100','1천','1만','10만','100만'][e],x,gy+gh+14,MC.sub,11,true,'center');}
-  line(gx,gy+gh,gx+gw,gy+gh,'#8a97a8',1.5);line(gx,gy,gx,gy+gh,'#8a97a8',1.5);
+  for(let e=0;e<=6;e++){const x=gx+gw*e/6;line(x,gy,x,gy+gh,'#f4ebe0',1.5);txt(['1','10','100','1천','1만','10만','100만'][e],x,gy+gh+14,MC.sub,11,true,'center');}
+  line(gx,gy+gh,gx+gw,gy+gh,'#b9a898',1.5);line(gx,gy,gx,gy+gh,'#b9a898',1.5);
   [0,.25,.5,.75,1].forEach(f=>{const v=ymax*f;txt(pct(v).replace('.0',''),gx-8,gy+gh-gh*f,MC.sub,10,true,'right');});
   const ey=gy+gh-gh*(p/ymax);line(gx,ey,gx+gw,ey,MC.red,2.5,[7,5]);txt('계산한 확률 '+(coin?'1/2':'1/'+s.p.faces),gx+gw-4,ey-11,MC.red,12,true,'right');
   plotLines(gx,gy,gw,gh,s.runs.map((r,i)=>({pts:r.pts,col:RUNCOL[i%5],w:i===s.runs.length-1?2.6:1.6,a:i===s.runs.length-1?1:.45})),0,ymax);
   if(R.n){const lp=R.pts[R.pts.length-1];circle(gx+lp[0]*gw,gy+gh-clamp(lp[1]/ymax,0,1)*gh,5,RUNCOL[(s.runs.length-1)%5],'#fff',2);}
   txt('던진 횟수 →',gx+gw,gy+gh+34,MC.sub,11,true,'right');
+  if(s.auto||s.age<.5){const busy=s.auto?s.t*16:s.age*14;coin?drawCoin(gx+gw-26,gy+26-Math.abs(Math.sin(busy*.6))*14,16,Math.cos(busy)>0,Math.cos(busy)):drawDie(gx+gw-26,gy+26-Math.abs(Math.sin(busy*.6))*14,28,Math.floor(busy)%6+1,6,null,busy*.4);}
   card(16,348,768,116);const diff=R.k-R.n*p,cx=[36,230,424,610];
   const S=(i,l,v,col)=>{txt(l,cx[i],372,MC.sub,12,true);txt(v,cx[i],372+36*Math.min(FS,1.35),col||MC.ink,mob?15:23,true);};
   S(0,'던진 횟수',fmtN(R.n)+'번');S(1,what+' 횟수',fmtN(R.k)+'번');
@@ -324,7 +327,7 @@ EX.push({course:'math',id:'rice',lesson:3,name:'쌀알 뿌리기',size:[800,470]
  AREA:40,QC:[['검정','#2b2b2b'],['파랑','#3b7ddd'],['빨강','#e0473c'],['노랑','#f2c230']],
  br(t){return 0.33+0.07*Math.sin(3*t)+0.05*Math.cos(5*t)+0.03*Math.sin(2*t+1);},
  inside(s,x,y){if(s.p.shape==='circle')return (x-.5)**2+(y-.5)**2<=.25;const dx=x-.5,dy=y-.5;return Math.hypot(dx,dy)<=this.br(Math.atan2(dy,dx));},
- reset(s){s.n=0;s.in=0;s.q=[0,0,0,0];s.dots=0;if(!s.off){s.off=document.createElement('canvas');s.off.width=s.off.height=600;}
+ reset(s){s.n=0;s.in=0;s.q=[0,0,0,0];s.dots=0;s.todo=0;s.batch=1;s.left=0;if(!s.off){s.off=document.createElement('canvas');s.off.width=s.off.height=600;}
   const g=s.off.getContext('2d'),Z=600;g.clearRect(0,0,Z,Z);
   if(s.p.shape==='quad'){this.QC.forEach((c,i)=>{g.fillStyle=c[1];g.globalAlpha=.88;g.fillRect((i%2)*Z/2,Math.floor(i/2)*Z/2,Z/2,Z/2);});g.globalAlpha=1;}
   else{g.fillStyle='#fdf1d6';g.fillRect(0,0,Z,Z);g.fillStyle='#dff0e6';g.strokeStyle='#2e9e6b';g.lineWidth=4;g.beginPath();
@@ -332,14 +335,14 @@ EX.push({course:'math',id:'rice',lesson:3,name:'쌀알 뿌리기',size:[800,470]
    g.closePath();g.fill();g.stroke();}
   if(s.p.shape==='blob'){let a=0;const N=7200;for(let i=0;i<N;i++){const r=this.br(i/N*2*Math.PI);a+=r*r/2*(2*Math.PI/N);}s.true=a*this.AREA;}else s.true=this.AREA*Math.PI/4;},
  param(s,k){if(k==='shape')this.reset(s);},
- act(s,a){if(a==='clear')return this.reset(s);const g=s.off.getContext('2d'),n=s.p.per,quad=s.p.shape==='quad',draw=Math.min(n,2500);
+ act(s,a){if(a==='clear')return this.reset(s);s.todo+=s.p.per;s.batch=Math.max(1,Math.ceil(s.todo/26));s.left=Math.min(2500,s.todo);},
+ step(s){if(!s.todo)return;const g=s.off.getContext('2d'),n=Math.min(s.todo,s.batch),quad=s.p.shape==='quad',draw=Math.min(n,Math.ceil(s.left/Math.max(1,Math.ceil(s.todo/s.batch))));
   for(let i=0;i<n;i++){const x=Math.random(),y=Math.random();let inn=false;if(quad)s.q[(x<.5?0:1)+(y<.5?0:2)]++;else{inn=this.inside(s,x,y);if(inn)s.in++;}
-   if(i<draw&&s.dots<40000){g.fillStyle=quad?'#fffbe8':inn?'#1f7a4d':'#d9534f';g.fillRect(x*600-2,y*600-2,4,4);s.dots++;}}
-  s.n+=n;},
- step(){},
+   if(i<draw&&s.dots<40000){g.fillStyle=quad?'#fffbe8':inn?'#1f7a4d':'#d9534f';g.beginPath();g.ellipse(x*600,y*600,3.4,2.2,x*9,0,7);g.fill();s.dots++;s.left--;}}
+  s.n+=n;s.todo-=n;},
  draw(s){paper();const mob=FS>1.3,quad=s.p.shape==='quad',A=this.AREA;
   card(16,16,438,438,`보자기 전체 넓이 = ${A}`);ctx.drawImage(s.off,35,46,400,400);ctx.strokeStyle='#8a7d5c';ctx.lineWidth=2;ctx.strokeRect(35,46,400,400);
-  if(s.n>s.dots&&!mob)txt(`쌀알 ${fmtN(s.n)}알 중 ${fmtN(s.dots)}알만 그렸어요`,235,434,'#1d2a3a',11,true,'center','rgba(255,255,255,.85)');
+  if(s.n>s.dots&&!mob)txt(`쌀알 ${fmtN(s.n)}알 중 ${fmtN(s.dots)}알만 그렸어요`,235,434,MC.ink,11,true,'center','rgba(255,255,255,.85)');
   card(466,16,318,438,`뿌린 쌀알: ${fmtN(s.n)}알`);
   if(quad){this.QC.forEach((c,i)=>{const y=74+i*86*Math.min(1,1/FS*1.3);box(486,y-12,20,20,c[1],null,4);txt(c[0],514,y,MC.ink,14,true);
      txt(`${fmtN(s.q[i])}알`,582,y,MC.ink,13,true);if(s.n){txt(pct(s.q[i]/s.n),764,y,MC.blue,13,true,'right');
@@ -364,24 +367,25 @@ EX.push({course:'math',id:'monty',lesson:3,name:'몬티홀 문제',size:[800,470
  controls:[{type:'seg',key:'doors',label:'문의 개수',opts:[[3,'3개'],[5,'5개'],[10,'10개']],val:3},
   {type:'seg',key:'host',label:'사회자는 자동차 위치를',opts:[['know','알고 있다'],['blind','모른다 (아무 문이나 연다)']],val:'know'}],
  buttons:[{label:'바꾼다',act:'sw'},{label:'안 바꾼다',act:'st'},{label:'1000판 자동: 늘 바꾸기',act:'asw',ghost:true},{label:'1000판 자동: 안 바꾸기',act:'ast',ghost:true},{label:'기록 지우기',act:'clear',ghost:true}],
- reset(s){s.ph='pick';s.car=-1;s.pick=-1;s.other=-1;s.final=-1;s.st={sw:[0,0],st:[0,0],void:0};},
+ reset(s){s.age=9;s.ph='pick';s.car=-1;s.pick=-1;s.other=-1;s.final=-1;s.st={sw:[0,0],st:[0,0],void:0};},
  param(s){this.reset(s);},
  deal(s,pick){const n=s.p.doors,car=rint(n);let other;
   if(s.p.host==='know')other=car!==pick?car:(pick+1+rint(n-1))%n;else other=(pick+1+rint(n-1))%n;
   return{car,other,void:car!==pick&&car!==other};},
- start(s,pick){const d=this.deal(s,pick);s.car=d.car;s.pick=pick;s.other=d.other;s.final=-1;if(d.void){s.ph='void';s.st.void++;}else s.ph='decide';},
+ start(s,pick){const d=this.deal(s,pick);s.car=d.car;s.pick=pick;s.other=d.other;s.final=-1;s.age=0;if(d.void){s.ph='void';s.st.void++;}else s.ph='decide';},
  act(s,a){if(a==='clear')return this.reset(s);
-  if((a==='sw'||a==='st')&&s.ph==='decide'){s.final=a==='sw'?s.other:s.pick;s.st[a][1]++;if(s.final===s.car)s.st[a][0]++;s.ph='done';}
+  if((a==='sw'||a==='st')&&s.ph==='decide'){s.final=a==='sw'?s.other:s.pick;s.st[a][1]++;if(s.final===s.car)s.st[a][0]++;s.ph='done';s.age=0;}
   if(a==='asw'||a==='ast'){const k=a==='asw'?'sw':'st';for(let i=0;i<1000;i++){const pick=rint(s.p.doors),d=this.deal(s,pick);if(d.void){s.st.void++;continue;}s.st[k][1]++;if((k==='sw'?d.other:pick)===d.car)s.st[k][0]++;}if(s.ph!=='decide')s.ph='pick';}},
- step(){},
+ step(s,dt){s.age+=dt;},
  geo(s){const n=s.p.doors,dw=Math.min(120,(768-(n-1)*8)/n),gap=n>1?Math.min(40,(768-n*dw)/(n-1)):0,x0=16+(768-(n*dw+(n-1)*gap))/2;return{n,dw,x:i=>x0+i*(dw+gap)};},
- click(s,x,y){if(y<36||y>220)return;const g=this.geo(s);for(let i=0;i<g.n;i++)if(x>=g.x(i)&&x<=g.x(i)+g.dw){if(s.ph!=='decide')this.start(s,i);return;}},
+ click(s,x,y){if(y<36||y>230)return;const g=this.geo(s);for(let i=0;i<g.n;i++)if(x>=g.x(i)&&x<=g.x(i)+g.dw){if(s.ph!=='decide')this.start(s,i);return;}},
  draw(s){paper();const g=this.geo(s),mob=FS>1.3,dh=150,dy=44,know=s.p.host==='know',n=g.n;
   for(let i=0;i<n;i++){const x=g.x(i),w=g.dw,open=s.ph==='done'||s.ph==='void'?true:s.ph==='decide'?(i!==s.pick&&i!==s.other):false,mine=i===s.pick&&s.ph!=='pick';
-   box(x,dy,w,dh,open?'#efe7da':'#8b5e3c','#5a3a22',5,3);
-   if(open){if(i===s.car){const cw=Math.min(w*.7,64);box(x+w/2-cw/2,dy+72,cw,cw*.36,'#d9534f',null,6);box(x+w/2-cw*.3,dy+72-cw*.24,cw*.55,cw*.28,'#d9534f',null,5);circle(x+w/2-cw*.28,dy+72+cw*.36,cw*.11,'#1d2a3a');circle(x+w/2+cw*.28,dy+72+cw*.36,cw*.11,'#1d2a3a');if(w>44)txt('자동차',x+w/2,dy+128,MC.red,12/Math.max(1,FS*.75),true,'center');}
-     else if(w>38)txt('염소',x+w/2,dy+dh/2,'#7a6a55',14/Math.max(1,FS*.75),true,'center');else circle(x+w/2,dy+dh/2,6,'#b8a88f');}
-   else{ctx.font=`900 ${Math.min(w*.5,44)}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#f6e3c7';ctx.fillText(i+1,x+w/2,dy+dh/2);circle(x+w-10,dy+dh/2,3.5,'#f2b32c');}
+   const was=s.ph==='decide'?false:(s.ph==='done'&&(i!==s.pick&&i!==s.other)),u=open&&!was?clamp(s.age/.45,0,1):open?1:0,dw2=Math.min(w,dh*.85),cy2=dy+dh/2;
+   if(open){if(!spr('door_open',x+w/2,cy2,dh,{w:dw2}))box(x,dy,w,dh,'#efe7da','#5a3a22',5,3);
+     ctx.globalAlpha=u;if(i===s.car){if(!spr('car',x+w/2,cy2+dh*.2,Math.min(dw2*.5,60)))circle(x+w/2,cy2,10,MC.red);}else{if(!spr('goat',x+w/2,cy2+dh*.14,Math.min(dw2*.72,92)))circle(x+w/2,cy2,6,'#b8a88f');}ctx.globalAlpha=1;}
+   if(u<1){ctx.save();ctx.globalAlpha=1-u;if(!spr('door',x+w/2-u*dw2*.3,cy2,dh,{w:dw2*(1-u*.6)}))box(x,dy,w,dh,'#8b5e3c','#5a3a22',5,3);ctx.restore();
+     if(!open){ctx.font=`900 ${Math.min(dw2*.3,34)}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff7e6';ctx.fillText(i+1,x+w/2,cy2-4);}}
    if(mine){box(x-4,dy-4,w+8,dh+8,null,MC.blue,7,4);if(w>60||!mob)txt(w>60?'내가 고른 문':'내 문',x+w/2,dy+dh+16,MC.blue,11,true,'center');}
    if(s.ph==='decide'&&i===s.other&&(w>60||!mob))txt(w>60?'바꿀 수 있는 문':'바꿀 문',x+w/2,dy+dh+16,MC.red,11,true,'center');
    if(s.ph==='done'&&i===s.final){box(x-4,dy-4,w+8,dh+8,null,i===s.car?MC.green:MC.red,7,4);}}
@@ -420,9 +424,9 @@ EX.push({course:'math',id:'wheel',lesson:4,name:'돌림판 부스',size:[800,480
  draw(s){paper();const mob=FS>1.3,cx=168,cy=190,R=138,seg=Math.PI*2/20,b=s.p.bet,w=WC[b][2],p=s.prize[b],e=this.ev(s,b);
   card(16,16,304,448);
   for(let i=0;i<20;i++){const a0=-Math.PI/2+s.ang+i*seg;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a0+seg);ctx.closePath();ctx.fillStyle=WC[WSEQ[i]][1];ctx.globalAlpha=WSEQ[i]===b?1:.5;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
-  circle(cx,cy,16,'#fff','#1d2a3a',2.5);ctx.fillStyle='#1d2a3a';ctx.beginPath();ctx.moveTo(cx-11,cy-R-14);ctx.lineTo(cx+11,cy-R-14);ctx.lineTo(cx,cy-R+10);ctx.closePath();ctx.fill();
+  circle(cx,cy,16,'#fff',MC.ink,2.5);ctx.fillStyle=MC.ink;ctx.beginPath();ctx.moveTo(cx-11,cy-R-14);ctx.lineTo(cx+11,cy-R-14);ctx.lineTo(cx,cy-R+10);ctx.closePath();ctx.fill();
   txt(s.msg||'색을 고르고 돌려 보세요',168,360,s.win===true?MC.green:s.win===false?MC.red:MC.ink,mob?10:13,true,'center');
-  txt('가진 쿠폰',40,404,MC.sub,12,true);txt(`${20+s.net}장`,40,404+30*Math.min(FS,1.3),20+s.net<0?MC.red:MC.ink,mob?17:24,true);
+  spr('coupons',262,424,54);txt('가진 쿠폰',40,404,MC.sub,12,true);txt(`${20+s.net}장`,40,404+30*Math.min(FS,1.3),20+s.net<0?MC.red:MC.ink,mob?17:24,true);
   if(!mob)txt(20+s.net<0?'(빌린 쿠폰)':`20장에서 시작 · ${fmtN(s.n)}판`,150,438,MC.sub,12,true);
   card(332,16,452,208,`${WC[b][0]}에 걸 때의 기대값`);
   const fs=mob?11:15,y1=74,y2=y1+46*Math.min(FS,1.25),x=352;
@@ -446,17 +450,17 @@ EX.push({course:'math',id:'dicebooth',lesson:4,name:'주사위 부스',size:[800
  controls:[{type:'range',key:'bet',label:'쿠폰을 걸 숫자 (두 눈의 합)',min:2,max:12,step:1,val:7,fmt:v=>'합 '+v},
   {type:'range',key:'prize',label:'이 숫자를 맞추면 받는 쿠폰',min:1,max:40,step:1,val:4,fmt:v=>v+'장'}],
  buttons:[{label:'굴리기',act:'roll'},{label:'36판 자동',act:'a36'},{label:'3600판 자동',act:'a3600'},{label:'처음부터 (상금도 원래대로)',act:'reset',ghost:true}],
- reset(s){s.prize={...DPRIZE};s.net=0;s.n=0;s.hist=[];s.last=null;s.msg='';s.win=null;},
+ reset(s){s.prize={...DPRIZE};s.net=0;s.n=0;s.hist=[];s.last=null;s.msg='';s.win=null;s.rolling=0;s.t=0;},
  param(s,k){if(k==='bet'){s.p.prize=s.prize[s.p.bet];buildControls();}else s.prize[s.p.bet]=s.p.prize;s.net=0;s.n=0;s.hist=[];s.msg='';s.win=null;},
  ways(t){return 6-Math.abs(7-t);},
  ev(s,t){const w=this.ways(t);return w*s.prize[t]-(36-w);},
  play(s){const a=rint(6)+1,b=rint(6)+1,win=a+b===s.p.bet;s.net+=win?s.prize[s.p.bet]:-1;s.n++;pushHist(s);s.last=[a,b];return win;},
  act(s,a){if(a==='reset'){this.reset(s);s.p.prize=s.prize[s.p.bet];buildControls();return;}
-  if(a==='roll'){s.win=this.play(s);s.msg=s.win?`합 ${s.p.bet}! 쿠폰 ${s.prize[s.p.bet]}장을 받았어요`:`합 ${s.last[0]+s.last[1]}. 쿠폰 1장을 잃었어요`;}
+  if(s.rolling>0)return;if(a==='roll'){s.rolling=.7;s.msg='';s.win=null;if(!s.last)s.last=[1,1];}
   else{const k=a==='a36'?36:3600;for(let i=0;i<k;i++)this.play(s);s.win=null;s.msg=`${fmtN(k)}판을 자동으로 굴렸어요`;}},
- step(){},
+ step(s,dt){s.t+=dt;if(s.rolling>0){s.rolling-=dt;if(s.rolling<=0){s.rolling=0;s.win=this.play(s);s.msg=s.win?`합 ${s.p.bet}! 쿠폰 ${s.prize[s.p.bet]}장을 받았어요`:`합 ${s.last[0]+s.last[1]}. 쿠폰 1장을 잃었어요`;}}},
  draw(s){paper();const mob=FS>1.3,t=s.p.bet,w=this.ways(t),p=s.prize[t],e=this.ev(s,t);
-  card(16,16,250,208);if(s.last){drawDie(96,84,64,s.last[0]);drawDie(186,84,64,s.last[1]);}else txt('굴리기를 눌러 보세요',141,84,MC.sub,13,true,'center');
+  card(16,16,250,208);if(s.last){const R=s.rolling>0;[0,1].forEach(j=>drawDie(96+j*90,84-(R?Math.abs(Math.sin(s.t*13+j))*18:0),64,R?rint(6)+1:s.last[j],6,null,R?Math.sin(s.t*17+j*2)*.5:0));}else txt('굴리기를 눌러 보세요',141,84,MC.sub,13,true,'center');
   txt(s.msg,141,140,s.win===true?MC.green:s.win===false?MC.red:MC.ink,mob?8:12,true,'center');
   txt('가진 쿠폰',36,176,MC.sub,12,true);txt(`${20+s.net}장`,mob?150:110,178,20+s.net<0?MC.red:MC.ink,mob?14:22,true);if(FS<1.1)txt(`${fmtN(s.n)}판`,246,178,MC.sub,12,true,'right');
   card(278,16,506,208,`합 ${t}에 걸 때의 기대값 (합 ${t}이 되는 경우 ${w}가지)`);
@@ -467,7 +471,7 @@ EX.push({course:'math',id:'dicebooth',lesson:4,name:'주사위 부스',size:[800
   if(!mob)txt(e===0?'36판 하면 평균적으로 본전':e<0?`36판 하면 평균 ${-e}장 손해`:`36판 하면 평균 ${e}장 이득 (주인이 손해!)`,x+190,y3,e<0?MC.red:e>0?MC.blue:MC.green,13,true);
   card(16,236,380,228,'숫자별 기대값 (36판 기준)');
   const E=[];for(let k=2;k<=12;k++)E.push(this.ev(s,k));const mx=Math.max(6,...E.map(Math.abs)),bx=34,bw=344/11,zy=mob?340:330,sc=70/mx;
-  line(bx,zy,bx+344,zy,'#8a97a8',1.5);
+  line(bx,zy,bx+344,zy,'#b9a898',1.5);
   E.forEach((v,i)=>{const x0=bx+i*bw+4,h=v*sc,k=i+2;ctx.fillStyle=v<0?'#e58a82':v>0?MC.bar:MC.green;if(v===0)ctx.fillRect(x0,zy-3,bw-8,6);else ctx.fillRect(x0,Math.min(zy,zy-h),bw-8,Math.abs(h));
     if(k===t)box(x0-3,zy-76,bw-2,152,null,MC.ink,4,2);if(!mob)txt(v===0?'0':(v>0?'+':'−')+Math.abs(v),x0+(bw-8)/2,v<=0?zy-h+11:zy-h-10,v<0?MC.red:v>0?MC.blue:MC.green,10,true,'center');
     txt(k,x0+(bw-8)/2,zy+92,MC.ink,11,true,'center');if(!mob)txt(s.prize[k]+'장',x0+(bw-8)/2,zy+110,MC.sub,9.5,true,'center');});
@@ -490,7 +494,7 @@ EX.push({course:'math',id:'bag',lesson:5,name:'공 주머니 게임 설계',size
   {type:'range',key:'pr',label:'빨강 상금',min:1,max:10,step:1,val:4,fmt:v=>v+'장'},{type:'range',key:'pb',label:'파랑 상금',min:1,max:10,step:1,val:3,fmt:v=>v+'장'},{type:'range',key:'pw',label:'흰색 상금',min:1,max:10,step:1,val:2,fmt:v=>v+'장'},
   {type:'seg',key:'cust',label:'어떤 손님이 올까',opts:[['smart','기대값을 계산하는 손님'],['rand','아무 색에나 거는 손님']],val:'smart',wide:true}],
  buttons:[{label:'손님 1명',act:'c1'},{label:'손님 100명',act:'c100'},{label:'손님 1만 명',act:'c10000'},{label:'기록 지우기',act:'clear',ghost:true}],
- reset(s){s.net=0;s.n=0;s.hist=[];s.msg='';},
+ reset(s){s.net=0;s.n=0;s.hist=[];s.msg='';s.age=9;s.col=null;},
  param(s){this.reset(s);},
  T(s){return s.p.nr+s.p.nb+s.p.nw;},
  ev(s,k){const c=s.p['n'+k],T=this.T(s);return c*s.p['p'+k]-(T-c);},
@@ -498,16 +502,17 @@ EX.push({course:'math',id:'bag',lesson:5,name:'공 주머니 게임 설계',size
  per(s){const T=this.T(s);return s.p.cust==='smart'?-this.ev(s,this.best(s))/T:-(this.ev(s,'r')+this.ev(s,'b')+this.ev(s,'w'))/3/T;},
  act(s,a){if(a==='clear')return this.reset(s);const k=+a.slice(1),T=this.T(s),best=this.best(s);let bet,win,col;
   for(let i=0;i<k;i++){bet=s.p.cust==='smart'?best:'rbw'[rint(3)];const x=rint(T);col=x<s.p.nr?'r':x<s.p.nr+s.p.nb?'b':'w';win=bet===col;s.net+=win?-s.p['p'+bet]:1;s.n++;pushHist(s);}
-  const nm=k=>BALL.find(b=>b[0]===k)[1];s.msg=k===1?`손님이 ${nm(bet)}에 걸었고 ${nm(col)} 공이 나왔어요 → 주인 ${win?'−'+s.p['p'+bet]:'+1'}장`:`손님 ${fmtN(k)}명이 다녀갔어요`;},
- step(){},
+  s.age=0;s.col=k===1?col:null;const nm=k=>BALL.find(b=>b[0]===k)[1];s.msg=k===1?`손님이 ${nm(bet)}에 걸었고 ${nm(col)} 공이 나왔어요 → 주인 ${win?'−'+s.p['p'+bet]:'+1'}장`:`손님 ${fmtN(k)}명이 다녀갔어요`;},
+ step(s,dt){s.age+=dt;},
  draw(s){paper();const mob=FS>1.3,T=this.T(s);
-  card(16,16,210,226,`공 ${T}개`);ctx.fillStyle='#f3e6d3';ctx.strokeStyle='#b58a52';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(46,70);ctx.quadraticCurveTo(26,230,121,230);ctx.quadraticCurveTo(216,230,196,70);ctx.closePath();ctx.fill();ctx.stroke();
-  const A=[];BALL.forEach(b=>{for(let i=0;i<s.p['n'+b[0]];i++)A.push(b[2]);});const cols=T>12?5:4,r=T>12?12:15;
-  A.forEach((c,i)=>circle(121-(cols-1)*(r+2)+(i%cols)*(2*r+4),98+Math.floor(i/cols)*(2*r+4),r,c,'#7a8899',1.5));
+  card(16,16,210,226,`공 ${T}개`);if(!spr('bag',121,150,170,{w:190})){ctx.fillStyle='#f3e6d3';ctx.strokeStyle='#b58a52';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(46,70);ctx.quadraticCurveTo(26,230,121,230);ctx.quadraticCurveTo(216,230,196,70);ctx.closePath();ctx.fill();ctx.stroke();}
+  const A=[];BALL.forEach(b=>{for(let i=0;i<s.p['n'+b[0]];i++)A.push(b[2]);});const cols=T>12?6:5,r=T>12?9:11;
+  A.forEach((c,i)=>circle(121-(cols-1)*(r+1.5)+(i%cols)*(2*r+3),148+Math.floor(i/cols)*(2*r+3),r,c,'#8a5a3c',1.5));
+  if(s.col&&s.age<1.6){const u=clamp(s.age/.45,0,1),e=1-(1-u)*(1-u);circle(121,lerp(150,58,e),16,BALL.find(b=>b[0]===s.col)[2],'#8a5a3c',2.5);}
   card(238,16,546,226,'손님 입장에서 본 기대값');
   const hx=[330,440,548,676];if(!mob)['확률','상금','기대값',''].forEach((h,i)=>txt(h,hx[i],58,MC.sub,12,true,'center'));
   let bad=false,zero=false;BALL.forEach((b,i)=>{const k=b[0],c=s.p['n'+k],e=this.ev(s,k),y=92+i*44;if(e>0)bad=true;if(e===0)zero=true;
-    circle(264,y,11,b[2],'#7a8899',1.5);if(!mob)txt(b[1],282,y,MC.ink,13,true);
+    circle(264,y,11,b[2],'#8a5a3c',1.5);if(!mob)txt(b[1],282,y,MC.ink,13,true);
     frac(c,T,hx[0],y,mob?11:13,MC.ink);txt(s.p['p'+k]+'장',hx[1],y,MC.gold,mob?11:15,true,'center');evDraw(e,T,hx[2],y,mob?11:13);
     if(!mob)txt(e>0?'손님 이득 → 주인 손해':e===0?'본전':'손님 손해 → 주인 이득',hx[3],y,e>0?MC.red:e===0?MC.green:MC.blue,12,true,'center');});
   const y4=228;txt(bad?'손님이 이득 보는 색이 있어요. 이대로 열면 부스가 망해요!':zero?'손님이 잘 골라도 본전이에요. 주인이 손해 보지 않아요.':'어떤 색에 걸어도 손님이 손해예요. 주인에게 유리한 설계예요.',258,y4-4,bad?MC.red:MC.green,mob?8:13,true);
@@ -534,22 +539,24 @@ EX.push({course:'math',id:'boxes',lesson:5,name:'상자 열기 게임',size:[800
  plan(s){return Math.min(s.p.plan,this.G(s));},
  odds(s,k){const n=s.p.n,b=this.B(s),tot=comb(n,b),win=comb(n-k,b);return{tot,win,ev:win*k-(tot-win)*s.p.fee};},
  shuffle(s){const n=s.p.n,a=new Array(n).fill(false);let left=this.B(s);while(left){const i=rint(n);if(!a[i]){a[i]=true;left--;}}return a;},
- newGame(s){s.ord=this.shuffle(s);s.open=0;s.ph='play';},
+ newGame(s){s.ord=this.shuffle(s);s.open=0;s.ph='play';s.age=9;},
  reset(s){s.my={n:0,net:0};s.sim={n:0,net:0,k:0};this.newGame(s);},
  param(s){this.reset(s);},
  act(s,a){if(a==='clear')return this.reset(s);if(a==='new')return this.newGame(s);
-  if(a==='open'){if(s.ph!=='play'){this.newGame(s);return;}if(s.open>=s.p.n)return;const lose=s.ord[s.open];s.open++;if(lose){s.ph='lost';s.my.n++;s.my.net-=s.p.fee;}else if(s.open>=this.G(s)&&s.ord.slice(0,s.open).filter(v=>!v).length===this.G(s)){s.ph='stop';s.my.n++;s.my.net+=s.open;}}
+  if(a==='open'){if(s.ph!=='play'){this.newGame(s);return;}if(s.open>=s.p.n)return;const lose=s.ord[s.open];s.open++;s.age=0;if(lose){s.ph='lost';s.my.n++;s.my.net-=s.p.fee;}else if(s.open>=this.G(s)&&s.ord.slice(0,s.open).filter(v=>!v).length===this.G(s)){s.ph='stop';s.my.n++;s.my.net+=s.open;}}
   if(a==='stop'&&s.ph==='play'&&s.open>0){s.ph='stop';s.my.n++;s.my.net+=s.open;}
   if(a==='auto'){const k=this.plan(s);if(s.sim.k!==k)s.sim={n:0,net:0,k};for(let i=0;i<1000;i++){const o=this.shuffle(s);let ok=true;for(let j=0;j<k;j++)if(o[j]){ok=false;break;}s.sim.n++;s.sim.net+=ok?k:-s.p.fee;}}},
- step(){},
+ step(s,dt){s.age+=dt;},
  draw(s){paper();const mob=FS>1.3,n=s.p.n,b=this.B(s),G=this.G(s),pk=this.plan(s);
   card(16,16,768,170,`상자 ${n}개 중 꽝 ${b}개 · 왼쪽부터 차례로 열어요`);
   const bw=Math.min(84,(728-(n-1)*10)/n),x0=36+(728-(n*bw+(n-1)*10))/2;
   for(let i=0;i<n;i++){const x=x0+i*(bw+10),y=52,op=i<s.open,rev=s.ph!=='play'&&!op,lose=s.ord[i];
-   if(op||rev){ctx.globalAlpha=rev?.45:1;box(x,y,bw,70,lose?'#fde4e1':'#fff4d6',lose?MC.red:'#e3b23c',6,2.5);txt(lose?'꽝':'쿠폰',x+bw/2,y+35,lose?MC.red:'#8a6500',14/Math.max(1,FS*.8),true,'center');ctx.globalAlpha=1;}
-   else{box(x,y,bw,70,'#c8a06a','#7a5a2c',6,2.5);line(x,y+22,x+bw,y+22,'#7a5a2c',2);txt(i+1,x+bw/2,y+46,'#5a3f18',15/Math.max(1,FS*.8),true,'center');}}
+   const just=op&&i===s.open-1,u=just?clamp(s.age/.35,0,1):1,cx3=x+bw/2,cy3=y+35,hh=Math.min(74,bw*.95);
+   if((op&&u>=1)||rev){ctx.globalAlpha=rev?.45:1;if(!spr('box_open',cx3,cy3+6,hh*.8,{w:Math.min(bw,hh*1.15)}))box(x,y,bw,70,lose?'#fde4e1':'#fff4d6',lose?MC.red:'#e3b23c',6,2.5);
+     const pop=just?1+Math.max(0,.5-(s.age-.35))*.8:1;if(lose)txt('꽝',cx3,cy3-6,MC.red,17*pop/Math.max(1,FS*.8),true,'center');else spr('coupon',cx3,cy3-12,hh*.36*pop,{rot:-.12});ctx.globalAlpha=1;}
+   else{if(!spr('gift',cx3,cy3,hh,{rot:just?Math.sin(s.age*46)*.12:0})){box(x,y,bw,70,'#c8a06a','#7a5a2c',6,2.5);}txt(i+1,cx3,y+84,MC.sub,12/Math.max(1,FS*.8),true,'center');}}
   const st=s.ph==='lost'?0:s.open;
-  txt(s.ph==='play'?(s.open?`쌓인 쿠폰 ${st}장 · 더 열까요, 그만할까요?`:'상자 열기를 눌러 시작해요'):s.ph==='lost'?`꽝! 쌓은 쿠폰을 모두 잃고 참가비 ${s.p.fee}장도 잃었어요`:`그만! 쿠폰 ${st}장을 가져가요`,400,150+6*FS,s.ph==='lost'?MC.red:s.ph==='stop'?MC.green:MC.ink,mob?10:14,true,'center');
+  txt(s.age<.35&&s.open?'두근두근…':s.ph==='play'?(s.open?`쌓인 쿠폰 ${st}장 · 더 열까요, 그만할까요?`:'상자 열기를 눌러 시작해요'):s.ph==='lost'?`꽝! 쌓은 쿠폰을 모두 잃고 참가비 ${s.p.fee}장도 잃었어요`:`그만! 쿠폰 ${st}장을 가져가요`,400,160+6*FS,s.age<.35?MC.sub:s.ph==='lost'?MC.red:s.ph==='stop'?MC.green:MC.ink,mob?10:14,true,'center');
   card(16,198,470,266,'계획별 기대값 (몇 개 열고 멈출지 미리 정했을 때)');
   for(let k=1;k<=G;k++){const o=this.odds(s,k),rowH=Math.min(44,196/G),y=258+(k-1)*rowH,on=k===pk;if(on)box(26,y-rowH/2+2,450,rowH-4,'#f0f5fb',MC.blue,6,2);
    txt(`${k}개 열고 멈춤`,40,y,MC.ink,mob?9:13,true);

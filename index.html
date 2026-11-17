@@ -6,59 +6,69 @@
 <title>실험실 · 하늘을 여는 과학자 / 게임 속 확률</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
-/* 방향: 학습노트 PDF와 한 벌인 실용형 실험 화면. 색은 노트의 차시 색, 제목은 Do Hyeon(실험실 명패 느낌), 본문은 Noto Sans KR */
-:root{--ink:#1d2a3a;--sub:#5b6b80;--line:#d6e0eb;--bg:#eef2f6;--navy:#1f3a5f;--c:#e8772e;--l:#fff1e6;
-  --disp:"Do Hyeon","Noto Sans KR",sans-serif;--body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+/* 방향: 받은 일러스트(파스텔 하늘·솜구름·흰 고양이)에 맞춘 화면. 색은 그림의 외곽선 갈색과 하늘·분홍·연보라·민트·노랑에서 뽑음.
+   제목은 그림처럼 둥근 Jua, 본문은 읽기 쉬운 Noto Sans KR */
+:root{--ink:#4a3a2e;--sub:#8a7566;--line:#ecdccb;--out:#b98d6f;--cream:#fdf8f1;--c:#e2636a;--l:#ffeef0;
+  --disp:"Jua","Noto Sans KR",sans-serif;--body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);word-break:keep-all;-webkit-tap-highlight-color:transparent}
+html{background:#cfe7fa}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:var(--body);word-break:keep-all;-webkit-tap-highlight-color:transparent;
+  background:#cfe7fa url(img/bg.jpg) center top/cover fixed no-repeat}
 button{font:inherit;color:inherit}
-header{background:var(--navy);color:#fff;padding:12px 16px 0}
-.brand{font-family:var(--disp);font-size:15px;letter-spacing:.5px;opacity:.75;margin-bottom:6px}
-.courses{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
-.courses button{flex:0 0 auto;white-space:nowrap}
-.courses button{border:0;background:transparent;color:#b9c8dc;font-family:var(--disp);font-size:21px;padding:8px 14px 10px;cursor:pointer;border-bottom:4px solid transparent}
-.courses button.on{color:#fff;border-bottom-color:#ffd166}
-.lessons{background:#fff;border-bottom:1px solid var(--line);display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:0 12px}
+header{max-width:1120px;margin:0 auto;padding:14px 14px 0;display:flex;align-items:flex-end;gap:10px}
+.hello{width:74px;flex:0 0 auto;margin-bottom:-6px}
+.hello img{display:block;width:100%}
+.head{flex:1;min-width:0}
+.brand{font-family:var(--disp);font-size:16px;color:#5f7fa3;margin:0 0 6px 6px}
+.courses{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.courses::-webkit-scrollbar{display:none}
+.courses button{flex:0 0 auto;display:flex;align-items:center;gap:6px;white-space:nowrap;border:2px solid var(--out);border-bottom:0;background:#fff7ee;color:var(--sub);
+  font-family:var(--disp);font-size:20px;padding:6px 16px 8px 8px;border-radius:18px 18px 0 0;cursor:pointer}
+.courses button img{width:40px;height:40px;object-fit:contain}
+.courses button.on{background:#fff;color:var(--ink);padding-bottom:10px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 14px 48px}
+.lessons{background:#fff;border:2px solid var(--out);border-radius:0 16px 16px 16px;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:4px 8px;margin-left:84px}
 .lessons::-webkit-scrollbar{display:none}
-.lessons button{flex:0 0 auto;border:0;background:transparent;font-size:14px;font-weight:700;color:var(--sub);padding:11px 12px 9px;cursor:pointer;border-bottom:3px solid transparent}
-.lessons button.on{color:var(--c);border-bottom-color:var(--c)}
-main{max-width:1120px;margin:0 auto;padding:12px 14px 48px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.chips button{border:1.5px solid var(--c);background:#fff;color:var(--c);font-size:14px;font-weight:700;padding:6px 13px;border-radius:999px;cursor:pointer}
+.lessons button{flex:0 0 auto;border:0;background:transparent;font-size:14px;font-weight:700;color:var(--sub);padding:8px 12px;cursor:pointer;border-radius:10px}
+.lessons button.on{color:#fff;background:var(--c)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.chips button{border:2px solid var(--c);background:#fff;color:var(--c);font-family:var(--disp);font-size:16px;padding:5px 14px;border-radius:999px;cursor:pointer}
 .chips button.on{background:var(--c);color:#fff}
 .layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
 @media (max-width:880px){.layout{grid-template-columns:minmax(0,1fr)}}
-.card{min-width:0;background:#fff;border-radius:14px;border:1px solid var(--line);padding:14px}
+.card{min-width:0;background:#fff;border-radius:20px;border:2px solid var(--out);padding:14px}
 .title{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px}
-.title h2{margin:0;font-family:var(--disp);font-weight:400;font-size:24px}
+.title h2{margin:0;font-family:var(--disp);font-weight:400;font-size:26px}
 .title span{font-size:12px;color:var(--c);font-weight:700}
-.ask{border-left:4px solid var(--c);background:var(--l);padding:8px 12px;font-size:14px;line-height:1.55;margin-bottom:10px}
+.ask{border-radius:12px;background:var(--l);padding:9px 13px;font-size:14px;line-height:1.55;margin-bottom:10px}
 .ask b{color:var(--c)}
-canvas{display:block;width:100%;height:auto;border-radius:6px;background:#eaf3fc;touch-action:manipulation}
-.stage{overflow-x:auto;border-radius:6px;max-width:100%}
+.stage{overflow-x:auto;border-radius:12px;max-width:100%;border:2px solid var(--line)}
 .stagehint{display:none;font-size:12px;color:var(--sub);margin-top:6px}
-@media (max-width:560px){main{padding:8px 6px 40px}.card{padding:10px}.stage canvas{width:560px}.stagehint{display:block}.courses button{font-size:18px;padding:8px 10px 10px}}
+canvas{display:block;width:100%;height:auto;background:#fdf8f1;touch-action:manipulation}
 .controls{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:12px;align-items:flex-end}
 .ctl{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 190px}
 .ctl label{font-size:13px;font-weight:700;color:var(--sub);display:flex;justify-content:space-between;gap:8px}
 .ctl label em{font-style:normal;color:var(--c);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctl input[type=range]{width:100%;accent-color:var(--c);height:28px;margin:0}
-.seg{display:flex;flex-wrap:wrap;background:#e9eef4;border-radius:8px;padding:3px;gap:3px}
-.seg button{flex:1 1 auto;border:0;background:transparent;font-size:13px;padding:7px 8px;border-radius:6px;cursor:pointer;white-space:nowrap}
-.seg button.on{background:#fff;color:var(--c);font-weight:900;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.seg{display:flex;flex-wrap:wrap;background:#f6ece0;border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1 1 auto;border:0;background:transparent;font-size:13px;padding:7px 8px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:#fff;color:var(--c);font-weight:900;box-shadow:0 1px 0 var(--out)}
 .chk{display:flex;gap:6px;flex-wrap:wrap}
-.chk button{border:1.5px solid var(--line);background:#fff;font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer}
+.chk button{border:2px solid var(--line);background:#fff;font-size:13px;padding:6px 10px;border-radius:12px;cursor:pointer}
 .chk button.on{border-color:var(--c);background:var(--l);color:var(--c);font-weight:900}
 .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.btn{border:0;background:var(--c);color:#fff;font-size:15px;font-weight:900;padding:11px 18px;border-radius:8px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.btn{border:0;background:var(--c);color:#fff;font-family:var(--disp);font-size:18px;padding:9px 20px 10px;border-radius:14px;cursor:pointer;user-select:none;-webkit-user-select:none;box-shadow:0 4px 0 rgba(74,58,46,.28)}
 .btn.hold{touch-action:none}
-.btn.ghost{background:#e9eef4;color:var(--ink)}
-.btn:active,.btn.hold.active{filter:brightness(.88)}
-.side h3{margin:0 0 6px;font-family:var(--disp);font-weight:400;font-size:18px;color:var(--c)}
-.side h3:not(:first-child){margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
-.side .now{font-size:14px;line-height:1.65;min-height:66px}
+.btn.ghost{background:#f6ece0;color:var(--ink);box-shadow:0 4px 0 #dcc9b3}
+.btn:active,.btn.hold.active{transform:translateY(3px);box-shadow:0 1px 0 rgba(74,58,46,.28)}
+.side h3{margin:0 0 6px;font-family:var(--disp);font-weight:400;font-size:19px;color:var(--c)}
+.side h3:not(:first-child){margin-top:16px;padding-top:12px;border-top:2px dashed var(--line)}
+.talk{display:flex;gap:8px;align-items:flex-start}
+.talk img{width:84px;flex:0 0 auto}
+.side .now{flex:1;font-size:14px;line-height:1.65;min-height:96px;background:var(--cream);border:2px solid var(--line);border-radius:14px;padding:9px 12px;position:relative}
+.side .now::before{content:"";position:absolute;left:-9px;top:26px;width:14px;height:14px;background:var(--cream);border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(45deg)}
 .side b{color:var(--c)}
 .side .why,.side .try{font-size:13.5px;line-height:1.7}
 .side ol,.side ul{margin:4px 0 0;padding-left:18px}
@@ -66,19 +76,24 @@ canvas{display:block;width:100%;height:auto;border-radius:6px;background:#eaf3fc
 .side table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px;font-variant-numeric:tabular-nums}
 .side th,.side td{border:1px solid var(--line);padding:4px 6px;text-align:center}
 .side th{background:var(--l)}
-.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;font-weight:900;color:#fff}
-.good{background:#2e9e6b}.mid{background:#c98a00}.bad{background:#d9534f}
+.tag{display:inline-block;padding:1px 8px;border-radius:6px;font-size:12px;font-weight:900;color:#fff}
+.good{background:#2fa084}.mid{background:#cf8a1c}.bad{background:#e2636a}
 .fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.85em;line-height:1.1;margin:0 2px}
 .fr i{font-style:normal;padding:0 3px}.fr i:first-child{border-bottom:1.3px solid currentColor}
+@media (max-width:560px){header{padding:8px 6px 0;gap:4px}.hello{width:52px}.wrap{padding:0 6px 40px}.lessons{margin-left:0;border-radius:0 14px 14px 14px}.card{padding:10px}
+  .stage canvas{width:560px}.stagehint{display:block}.courses button{font-size:16px;padding:4px 10px 6px 6px}.courses button img{width:30px;height:30px}.talk img{width:64px}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">직접 해 보는 실험실</div>
-  <nav class="courses" id="courses"></nav>
+  <div class="hello"><img src="img/cat_hello.png" alt=""></div>
+  <div class="head">
+    <div class="brand">직접 해 보는 실험실</div>
+    <nav class="courses" id="courses"></nav>
+  </div>
 </header>
-<nav class="lessons" id="lessons"></nav>
-<main>
+<div class="wrap">
+  <nav class="lessons" id="lessons"></nav>
   <div class="chips" id="chips"></div>
   <div class="layout">
     <section class="card">
@@ -91,7 +106,7 @@ canvas{display:block;width:100%;height:auto;border-radius:6px;background:#eaf3fc
     </section>
     <aside class="card side">
       <h3>무슨 일이 일어났나요?</h3>
-      <div class="now" id="now"></div>
+      <div class="talk"><img id="mascot" src="img/cat_point.png" alt=""><div class="now" id="now"></div></div>
       <h3>왜 그럴까요?</h3>
       <div class="why" id="why"></div>
       <h3 id="tryH">이렇게 해 보세요</h3>
@@ -99,10 +114,11 @@ canvas{display:block;width:100%;height:auto;border-radius:6px;background:#eaf3fc
       <div class="rec" id="rec"></div>
     </aside>
   </div>
-</main>
+</div>
 <script src="js/core.js"></script>
 <script src="js/science.js"></script>
 <script src="js/math.js"></script>
+<script src="js/mood.js"></script>
 <script>boot();</script>
 </body>
 </html>
