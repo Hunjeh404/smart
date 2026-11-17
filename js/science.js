@@ -328,13 +328,14 @@ EX.push({
    r.cfg={...s.p};s.run=r;s.k=0;s.tt=0;}},
  step(s,dt){if(!s.run)return;s.tt+=dt*0.75;while(s.k<s.run.pts.length-1&&s.run.pts[s.k+1].t<=s.tt)s.k++;
   if(s.k>=s.run.pts.length-1&&!s.run.saved){s.run.saved=true;const r=s.run;this.recs.push({c:r.cfg,d:r.dist,t:r.t,st:r.straight,mh:r.maxh});if(this.recs.length>9)this.recs.shift();s.trails.push(r);if(s.trails.length>3)s.trails.shift();}},
+ pic(t){return spr({flat:'plane_wide',glider:'plane_glide2',boom:'boomerang'}[t],0,-2,t==='boom'?16:20,{flip:true});},
  draw(s){
   // 위: 옆에서 본 모습 (0~300), 아래: 위에서 본 모습
-  const SX=x=>40+x*48,SY=y=>270-y*55;
+  const SX=x=>112+x*45,SY=y=>270-y*55;
   sky('#e5f2ea','#f6fbf7');ctx.fillStyle='#cfe3c4';ctx.fillRect(0,270,W,30);
   txt('옆에서 본 모습 (날아간 길이와 높이)',14,20,'#1d2a3a',14,true,'left','rgba(255,255,255,.85)');
   for(let m=0;m<=15;m+=5){txt(m+'m',SX(m),288,'#5b7a63',11,false,'center');}
-  person(36,270,0.8);
+  handCat(SX(0),SY(1.6),270);
   // 아래 패널
   ctx.fillStyle='#eef6ff';ctx.fillRect(0,300,W,260);ctx.fillStyle='#d6e0eb';ctx.fillRect(0,300,W,2);
   txt('위에서 본 모습 (어느 쪽으로 날아갔나)',14,318,'#1d2a3a',14,true,'left','rgba(255,255,255,.85)');
@@ -347,10 +348,11 @@ EX.push({
    ctx.strokeStyle='#2f7fd1';ctx.beginPath();for(let i=0;i<=n;i++){const p=r.pts[i];i?ctx.lineTo(TX(p.X),TY(p.Y)):ctx.moveTo(TX(p.X),TY(p.Y));}ctx.stroke();ctx.globalAlpha=1;};
   (s.trails||[]).forEach(r=>{if(r!==s.run)drawTrail(r,0.25);});
   if(s.run){drawTrail(s.run,1,s.k);const p=s.run.pts[s.k],pp=s.run.pts[Math.max(0,s.k-1)];
-   ctx.save();ctx.translate(SX(p.x),SY(p.y));ctx.rotate(-p.th);if(!spr({flat:'plane_wide',glider:'plane_glide2',boom:'boomerang'}[s.run.cfg.type],0,-2,s.run.cfg.type==='boom'?16:20,{flip:true})){ctx.fillStyle='#2e9e6b';ctx.beginPath();ctx.moveTo(18,0);ctx.lineTo(-14,-9);ctx.lineTo(-9,0);ctx.lineTo(-14,4);ctx.closePath();ctx.fill();}ctx.restore();
+   ctx.save();ctx.translate(SX(p.x),SY(p.y));ctx.rotate(-p.th);if(!this.pic(s.run.cfg.type)&&!spr({flat:'plane_wide',glider:'plane_glide2',boom:'boomerang'}[s.run.cfg.type],0,-2,s.run.cfg.type==='boom'?16:20,{flip:true})){ctx.fillStyle='#2e9e6b';ctx.beginPath();ctx.moveTo(18,0);ctx.lineTo(-14,-9);ctx.lineTo(-9,0);ctx.lineTo(-14,4);ctx.closePath();ctx.fill();}ctx.restore();
    const hd=Math.atan2(-(p.Y-pp.Y),p.X-pp.X||1e-6);ctx.save();ctx.translate(TX(p.X),TY(p.Y));ctx.rotate(s.k?hd:0);this.topShape(s.run.cfg.type);ctx.restore();
    txt(`${(s.run.pts[s.k].t).toFixed(1)}초`,W-16,20,'#1d2a3a',15,true,'right','rgba(255,255,255,.85)');}
   else{ctx.save();ctx.translate(TX(0)+14,TY(0));this.topShape(s.p.type);ctx.restore();}
+  if(!s.run||s.k>=s.run.pts.length-1){ctx.save();ctx.translate(SX(0),SY(1.6));ctx.rotate(-PTYPES[s.p.type].a0);this.pic(s.p.type);ctx.restore();}
  },
  topShape(t){ctx.fillStyle='#cfe9dc';ctx.strokeStyle='#2e9e6b';ctx.lineWidth=2;ctx.beginPath();
   if(t==='flat'){ctx.moveTo(18,0);ctx.lineTo(-14,-9);ctx.lineTo(-10,0);ctx.lineTo(-14,9);}
@@ -474,9 +476,9 @@ EX.push({
    if(s.p.dir==='rev')P={...P,kS:-40,atrim:0.3,damp:2};const r=glideRun(P);r.cfg={...s.p};s.run=r;s.k=0;s.tt=0;}},
  step(s,dt){if(!s.run)return;s.tt+=dt*0.75;while(s.k<s.run.pts.length-1&&s.run.pts[s.k+1].t<=s.tt)s.k++;
   if(s.k>=s.run.pts.length-1&&!s.run.saved){s.run.saved=true;const r=s.run;this.recs.push({c:r.cfg,d:r.dist,t:r.t});if(this.recs.length>6)this.recs.shift();s.trails.push(r);if(s.trails.length>3)s.trails.shift();}},
- draw(s){const SX=x=>50+x*62,SY=y=>350-y*120;sky('#efeafb','#faf8fe');ground(350,'#d9e9cf');
+ draw(s){const SX=x=>140+x*54,SY=y=>350-y*80;sky('#efeafb','#faf8fe');ground(350,'#d9e9cf');
   for(let m=0;m<=12;m+=2)txt(m+'m',SX(m),368,'#5b7a63',11,false,'center');
-  person(40,350,0.8);
+  handCat(SX(0),SY(1.4),350);
   const tr=(r,al,n)=>{n=n??r.pts.length-1;ctx.globalAlpha=al;ctx.strokeStyle='#7a52c7';ctx.lineWidth=2.5;ctx.beginPath();for(let i=0;i<=n;i++){const p=r.pts[i];i?ctx.lineTo(SX(p.x),SY(p.y)):ctx.moveTo(SX(p.x),SY(p.y));}ctx.stroke();ctx.globalAlpha=1;};
   s.trails.forEach(r=>{if(r!==s.run)tr(r,0.25);});
   const drawRing=(x,y,th,rev)=>{if(spr('ringplane',x,y,46,{rot:-th,flip:!rev}))return;ctx.save();ctx.translate(x,y);ctx.rotate(-th);
@@ -484,7 +486,7 @@ EX.push({
    ctx.strokeStyle='#7a52c7';ctx.beginPath();ctx.moveTo(-16,-20);ctx.lineTo(16,-20);ctx.moveTo(-16,20);ctx.lineTo(16,20);ctx.stroke();
    ctx.strokeStyle='#3b2a7a';ctx.lineWidth=s.p.wt==='light'?3:s.p.wt==='good'?6:9;ctx.beginPath();ctx.ellipse(f*16,0,7,20,0,0,7);ctx.stroke();ctx.restore();};
   if(s.run){tr(s.run,1,s.k);const p=s.run.pts[s.k];drawRing(SX(p.x),SY(p.y),p.th,s.run.cfg.dir==='rev');txt(`${p.t.toFixed(1)}초`,W-16,24,'#1d2a3a',15,true,'right','rgba(255,255,255,.85)');}
-  else drawRing(SX(0.4),SY(1.4),0,s.p.dir==='rev');
+  if(!s.run||s.k>=s.run.pts.length-1)drawRing(SX(0),SY(1.4),0,s.p.dir==='rev');
   txt('진하고 두꺼운 테두리 = 무거운 쪽',16,24,'#3b2a7a',13,true,'left','rgba(255,255,255,.85)');
  },
  now(s){if(!s.run)return '앞테두리와 방향을 고르고 <b>날리기</b>를 눌러요.';const r=s.run,c=r.cfg;if(s.k<r.pts.length-1)return '날아가는 중…';
