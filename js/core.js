@@ -1,5 +1,5 @@
 "use strict";
-const VER='20261121a';
+const VER='20261121b';
 /* ================== 강의·차시 ================== */
 const COURSES=[
  {id:'sci',name:'하늘을 여는 과학자',lessons:[
