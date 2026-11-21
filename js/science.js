@@ -16,6 +16,7 @@ EX.push({
  rad(A){return 0.03+0.09*Math.cbrt(A);},            // 풍선 반지름(m)
  X(s){return s.p.mouth==='left'?110+s.d*this.M:690-s.d*this.M;},
  step(s,dt){
+  sfxLoop('air','wind-loop',!!(s.run&&s.A>0),{rate:1.6,volume:.45});
   const dir=s.p.mouth==='left'?1:-1;
   if(s.run){
    for(let i=0;i<8;i++){const h=dt/8;
@@ -77,7 +78,7 @@ EX.push({
  buttons:[{label:'처음으로',act:'reset',ghost:true}],
  V:1500, // 풍선 부피(㎥)
  reset(s){s.T=s.p.out;s.alt=0;s.vy=0;s.t=0;s.esc=[];s.mol=[];for(let i=0;i<40;i++)s.mol.push({a:rnd(0,7),r:Math.sqrt(Math.random()),ph:rnd(0,7)});s.out=[];for(let i=0;i<80;i++)s.out.push({x:rnd(0,W),y:rnd(0,400),ph:rnd(0,7)});},
- param(s,k){if(k==='out')s.T=Math.max(s.T,s.p.out);},
+ param(s,k){if(k==='out')s.T=Math.max(s.T,s.p.out);if(k==='burn'){if(s.p.burn>0&&!(s.pb>0))sfx('ignite');s.pb=s.p.burn;}},
  act(s,a){if(a==='reset')this.reset(s);},
  calc(s){const rhoOut=1.2*293/(273+s.p.out),rhoIn=1.2*293/(273+s.T);
   const B=rhoOut*this.V,air=rhoIn*this.V,load=250+75*s.p.ppl;return{B,air,load,Wt:air+load,ratio:rhoIn/rhoOut};},
@@ -132,7 +133,7 @@ EX.push({
  controls:[{type:'range',key:'str',label:'바람 세기',min:20,max:100,step:5,val:70,fmt:v=>v+'%'}],
  buttons:[{label:'꾹 눌러서 후~ 불기',act:'blow',hold:true}],
  reset(s){s.th=-62;s.blow=false;s.parts=[];s.t=0;},
- act(s,a,on){if(a==='blow')s.blow=on;},
+ act(s,a,on){if(a==='blow'){s.blow=on;sfxLoop('blow','wind-loop',on,{volume:.3+.5*s.p.str/100});}},
  pts(s){const P=[];let x=170,y=190,a=s.th*Math.PI/180;const n=24,seg=420/n,lift=(s.th+62)/57;
   for(let i=0;i<=n;i++){P.push([x,y]);const droop=(1-lift*0.85)*0.9*(i/n)+0.05;a+=droop*0.06;x+=Math.cos(-a)*seg;y+=Math.sin(-a)*seg*-1;}
   return P;},
@@ -168,7 +169,7 @@ EX.push({
   {type:'range',key:'str',label:'바람 세기',min:20,max:100,step:5,val:80,fmt:v=>v+'%'}],
  buttons:[{label:'꾹 눌러서 후~ 불기',act:'blow',hold:true}],
  reset(s){s.phi=0;s.w=0;s.blow=false;s.parts=[];},
- act(s,a,on){if(a==='blow')s.blow=on;if(a==='blow'&&!on){}},
+ act(s,a,on){if(a==='blow'){s.blow=on;sfxLoop('blow','wind-loop',on,{volume:.3+.5*s.p.str/100});}},
  geo(s){const R=62,pxcm=7,half=R+s.p.gap*pxcm/2;return{R,half,piv:40,L:270,pxcm};},
  step(s,dt){const g=this.geo(s);const F=s.blow?(s.p.str/100)*0.55/Math.pow(s.p.gap/3,1.6):0;
   const acc=-9*Math.sin(s.phi)-2.2*s.w+F;s.w+=acc*dt;s.phi+=s.w*dt;
@@ -207,7 +208,7 @@ EX.push({
  controls:[{type:'range',key:'str',label:'바람 세기',min:20,max:100,step:5,val:80,fmt:v=>v+'%'}],
  buttons:[{label:'꾹 눌러서 후~ 불기',act:'blow',hold:true}],
  reset(s){s.blow=false;s.parts=[];s.lift=0;s.t=0;s.held=0;},
- act(s,a,on){if(a==='blow')s.blow=on;},
+ act(s,a,on){if(a==='blow'){s.blow=on;sfxLoop('blow','wind-loop',on,{volume:.3+.5*s.p.str/100});}},
  step(s,dt){s.t+=dt;const tgt=s.blow?3+4*s.p.str/100:0;s.lift+=(tgt-s.lift)*8*dt;if(s.blow)s.held+=dt;
   if(s.blow)for(let i=0;i<4;i++)s.parts.push({u:0,side:Math.random()<.5?-1:1,sp:rnd(.8,1.2)*(0.5+s.p.str/100),j:rnd(-4,4)});
   s.parts.forEach(p=>p.u+=dt*p.sp*0.9);s.parts=s.parts.filter(p=>p.u<1);},
@@ -327,7 +328,7 @@ EX.push({
    const r=glideRun({...T,v0:T.v0*vr,a0:T.a0+rnd(-0.03,0.03),h0:1.6,kS:C.kS,atrim:T.base+C.d+PEL[s.p.el].d,damp:6,turn:T.turn+PRU[s.p.ru].d});
    r.cfg={...s.p};s.run=r;s.k=0;s.tt=0;}},
  step(s,dt){if(!s.run)return;s.tt+=dt*0.75;while(s.k<s.run.pts.length-1&&s.run.pts[s.k+1].t<=s.tt)s.k++;
-  if(s.k>=s.run.pts.length-1&&!s.run.saved){s.run.saved=true;const r=s.run;this.recs.push({c:r.cfg,d:r.dist,t:r.t,st:r.straight,mh:r.maxh});if(this.recs.length>9)this.recs.shift();s.trails.push(r);if(s.trails.length>3)s.trails.shift();}},
+  if(s.k>=s.run.pts.length-1&&!s.run.saved){s.run.saved=true;sfx('drop');const r=s.run;this.recs.push({c:r.cfg,d:r.dist,t:r.t,st:r.straight,mh:r.maxh});if(this.recs.length>9)this.recs.shift();s.trails.push(r);if(s.trails.length>3)s.trails.shift();}},
  pic(t){return spr({flat:'plane_wide',glider:'plane_glide2',boom:'boomerang'}[t],0,-2,t==='boom'?16:20,{flip:true});},
  draw(s){
   // 위: 옆에서 본 모습 (0~300), 아래: 위에서 본 모습
@@ -434,7 +435,7 @@ EX.push({
   if(dx>-0.05&&dx<0.8&&S.y>boty&&dy<0.9){const fx=Math.max(0,1-dx/0.8);const fy=dy<0?0.35+0.65*Math.max(0,1+dy/1.1):Math.max(0,1-dy/0.9);w=1.9*s*fx*fy;u=s*(1.6-1.5*(dx/0.8))*(dy<0?Math.max(0.5,fy):1);}
   S.vx+=(u-S.vx)*2.2*dt;S.vy+=((w-0.45)-S.vy)*3*dt;S.x+=S.vx*dt;S.y+=S.vy*dt;S.t+=dt;S.w=w;
   const bx2=S.xb+(clamp(S.y,boty,topy)-boty)/(topy-boty)*0.25;if(S.y>boty-0.05&&S.y<topy+0.04&&S.x<bx2+0.07)return'hit';if(S.y<=0.03)return'ground';if(S.x>9.6)return'goal';return null;},
- step(s,dt){if(s.run){for(let i=0;i<5;i++){const r=this.phys(s.S,s.p.spd,dt/5);if(r){s.run=false;s.res=r;this.recs.push({v:s.p.spd,t:s.S.t,r});if(this.recs.length>6)this.recs.shift();break;}}
+ step(s,dt){if(s.run){for(let i=0;i<5;i++){const r=this.phys(s.S,s.p.spd,dt/5);if(r){s.run=false;s.res=r;sfx({goal:'success',ground:'land',hit:'bonk'}[r]);this.recs.push({v:s.p.spd,t:s.S.t,r});if(this.recs.length>6)this.recs.shift();break;}}
   s.spin+=dt*(2+6*Math.hypot(s.S.vx,s.S.vy));
   if(s.S.w>0.1&&Math.random()<0.7)s.pf.push({x:s.S.xb+rnd(0.05,0.6),y:rnd(0.7,1.6),life:0.8});}
   s.pf.forEach(p=>{p.y+=dt*1.2*s.p.spd;p.x+=dt*s.p.spd*0.8;p.life-=dt;});s.pf=s.pf.filter(p=>p.life>0);},
@@ -475,7 +476,7 @@ EX.push({
   if(a==='throw'&&(!s.run||s.k>=s.run.pts.length-1)){const w=RW[s.p.wt];let P={kL:3.0,kD0:0.06,kDi:1.4,v0:5.5*rnd(.95,1.05),a0:0.03+rnd(-.02,.02),h0:1.4,turn:0,kS:w.kS,atrim:w.at,damp:w.damp};
    if(s.p.dir==='rev')P={...P,kS:-40,atrim:0.3,damp:2};const r=glideRun(P);r.cfg={...s.p};s.run=r;s.k=0;s.tt=0;}},
  step(s,dt){if(!s.run)return;s.tt+=dt*0.75;while(s.k<s.run.pts.length-1&&s.run.pts[s.k+1].t<=s.tt)s.k++;
-  if(s.k>=s.run.pts.length-1&&!s.run.saved){s.run.saved=true;const r=s.run;this.recs.push({c:r.cfg,d:r.dist,t:r.t});if(this.recs.length>6)this.recs.shift();s.trails.push(r);if(s.trails.length>3)s.trails.shift();}},
+  if(s.k>=s.run.pts.length-1&&!s.run.saved){s.run.saved=true;sfx('drop');const r=s.run;this.recs.push({c:r.cfg,d:r.dist,t:r.t});if(this.recs.length>6)this.recs.shift();s.trails.push(r);if(s.trails.length>3)s.trails.shift();}},
  draw(s){const SX=x=>140+x*54,SY=y=>350-y*80;sky('#efeafb','#faf8fe');ground(350,'#d9e9cf');
   for(let m=0;m<=12;m+=2)txt(m+'m',SX(m),368,'#5b7a63',11,false,'center');
   handCat(SX(0),SY(1.4),350);
@@ -512,7 +513,7 @@ EX.push({
  act(s,a){if(a==='drop'&&s.ph==='ready'){s.ph='fall';s.cfg={...s.p.prot,floor:s.p.floor,h:s.p.h};}if(a==='reset')this.reset(s);},
  calc(c,v){let d=c.floor==='mat'?0.05:0.002;if(c.cush)d+=0.025;if(c.legs)d+=0.015;const spread=(c.cush||c.floor==='mat')?1:1.5;const G=v*v/(2*d)/9.8*spread;const ms=2*d/v*1000;return{d,G,ms};},
  step(s,dt){if(s.ph==='fall'){const k=s.cfg.para?3.0:0.02;for(let i=0;i<10;i++){const h=dt/10;s.v+=(9.8-k*s.v*s.v)*h;s.y-=s.v*h;}s.t+=dt;
-   if(s.y<=0){s.y=0;const r=this.calc(s.cfg,s.v);s.res={...r,v:s.v,egg:r.G<25?0:r.G<60?1:2,lander:s.cfg.legs?(r.G<40?1:2):(r.G<60?0:1)};s.ph='impact';s.it=0;
+   if(s.y<=0){s.y=0;const r=this.calc(s.cfg,s.v);s.res={...r,v:s.v,egg:r.G<25?0:r.G<60?1:2,lander:s.cfg.legs?(r.G<40?1:2):(r.G<60?0:1)};s.ph='impact';s.it=0;sfx(['thud','hit-light','squish'][s.res.egg]);if(s.res.egg===0)sfx('success',{delay:.35});else if(s.res.egg===2)sfx('pot-break',{volume:.5});
     this.recs.push({c:s.cfg,...s.res});if(this.recs.length>6)this.recs.shift();}}
   else if(s.ph==='impact'){s.it+=dt;s.sq=Math.min(1,s.it/0.5);if(s.it>0.6)s.ph='done';}else if(s.ph==='done')s.it+=dt;},
  draw(s){const SY=y=>400-y*170,hh=s.p.h;sky('#fdf0ef','#fff9f8');

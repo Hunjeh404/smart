@@ -424,7 +424,7 @@ EX.push({course:'math',id:'wheel',lesson:4,name:'돌림판 부스',size:[800,480
  act(s,a){if(a==='reset'){this.reset(s);s.p.prize=s.prize[s.p.bet];buildControls();return;}
   if(s.spin)return;if(a==='spin'){const i=rint(20),seg=Math.PI*2/20,to=-(i+.5)*seg-rnd(-.3,.3)*seg;let d=((to-s.ang)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)+Math.PI*8;s.spin={t:0,from:s.ang,d,i};s.msg='';}
   else{const k=a==='a20'?20:1000;let i=0;for(let j=0;j<k;j++){i=rint(20);this.settle(s,i);}s.ang=-(i+.5)*Math.PI/10;s.msg=`${k}판을 자동으로 돌렸어요`;s.win=null;}},
- step(s,dt){s.t=(s.t||0)+dt;if(s.spin){s.spin.t+=dt/2.4;const u=Math.min(1,s.spin.t),e=1-Math.pow(1-u,3);s.ang=s.spin.from+s.spin.d*e;if(u>=1){const i=s.spin.i;s.spin=null;this.settle(s,i);}}},
+ step(s,dt){s.t=(s.t||0)+dt;if(s.spin){s.spin.t+=dt/2.4;const u=Math.min(1,s.spin.t),e=1-Math.pow(1-u,3);s.ang=s.spin.from+s.spin.d*e;const sec=Math.floor(s.ang/(Math.PI/10));if(sec!==s.sec){s.sec=sec;sfx('tick',{cooldown:0.03,volume:.7});}if(u>=1){const i=s.spin.i;s.spin=null;this.settle(s,i);if(s.win===true)sfx('jackpot');else if(s.win===false)sfx('pop-down');}}},
  draw(s){paper();const mob=FS>1.3,cx=168,cy=178,R=100,seg=Math.PI*2/20,b=s.p.bet,w=WC[b][2],p=s.prize[b],e=this.ev(s,b);
   card(16,16,304,448);const fk=(R+4)/92,hasF=spr('wheel_frame',cx,cy+6.5*fk,285*fk);
   for(let i=0;i<20;i++){const a0=-Math.PI/2+s.ang+i*seg;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,a0,a0+seg);ctx.closePath();ctx.fillStyle=WC[WSEQ[i]][1];ctx.globalAlpha=WSEQ[i]===b?1:.5;ctx.fill();ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();}
@@ -463,7 +463,7 @@ EX.push({course:'math',id:'dicebooth',lesson:4,name:'주사위 부스',size:[800
  act(s,a){if(a==='reset'){this.reset(s);s.p.prize=s.prize[s.p.bet];buildControls();return;}
   if(s.rolling>0)return;if(a==='roll'){s.rolling=.7;s.msg='';s.win=null;if(!s.last)s.last=[1,1];}
   else{const k=a==='a36'?36:3600;for(let i=0;i<k;i++)this.play(s);s.win=null;s.msg=`${fmtN(k)}판을 자동으로 굴렸어요`;}},
- step(s,dt){s.t+=dt;if(s.rolling>0){s.rolling-=dt;if(s.rolling<=0){s.rolling=0;s.win=this.play(s);s.done0=s.t;s.msg=s.win?`합 ${s.p.bet}! 쿠폰 ${s.prize[s.p.bet]}장을 받았어요`:`합 ${s.last[0]+s.last[1]}. 쿠폰 1장을 잃었어요`;}}},
+ step(s,dt){s.t+=dt;if(s.rolling>0){s.rolling-=dt;if(s.rolling<=0){s.rolling=0;s.win=this.play(s);s.done0=s.t;sfx(s.win?'ding-correct':'cancel');s.msg=s.win?`합 ${s.p.bet}! 쿠폰 ${s.prize[s.p.bet]}장을 받았어요`:`합 ${s.last[0]+s.last[1]}. 쿠폰 1장을 잃었어요`;}}},
  draw(s){paper();const mob=FS>1.3,t=s.p.bet,w=this.ways(t),p=s.prize[t],e=this.ev(s,t);
   card(16,16,250,208);if(s.last){const R=s.rolling>0;const u=1-s.rolling/.7,af=s.t-s.done0;[0,1].forEach(j=>{const x=96+j*90;if(R){const hop=Math.abs(Math.sin(u*Math.PI*2.5+j))*(1-u)*40;drawDieRoll(x-(1-u)*30,84-hop,64,6,s.t*10+j*3);}else{puff('dust',x,116,40,af/.4);drawDie(x,84,64,s.last[j],6);}});if(!R&&s.win===true){puff('spark',141,70,120,af/.9);}
   }else txt('굴리기를 눌러 보세요',141,84,MC.sub,13,true,'center');
@@ -509,7 +509,7 @@ EX.push({course:'math',id:'bag',lesson:5,name:'공 주머니 게임 설계',size
  per(s){const T=this.T(s);return s.p.cust==='smart'?-this.ev(s,this.best(s))/T:-(this.ev(s,'r')+this.ev(s,'b')+this.ev(s,'w'))/3/T;},
  act(s,a){if(a==='clear')return this.reset(s);const k=+a.slice(1),T=this.T(s),best=this.best(s);let bet,win,col;
   for(let i=0;i<k;i++){bet=s.p.cust==='smart'?best:'rbw'[rint(3)];const x=rint(T);col=x<s.p.nr?'r':x<s.p.nr+s.p.nb?'b':'w';win=bet===col;s.net+=win?-s.p['p'+bet]:1;s.n++;pushHist(s);}
-  s.age=0;s.col=k===1?col:null;const nm=k=>BALL.find(b=>b[0]===k)[1];s.msg=k===1?`손님이 ${nm(bet)}에 걸었고 ${nm(col)} 공이 나왔어요 → 주인 ${win?'−'+s.p['p'+bet]:'+1'}장`:`손님 ${fmtN(k)}명이 다녀갔어요`;},
+  s.age=0;s.col=k===1?col:null;s.lastWin=win;const nm=k=>BALL.find(b=>b[0]===k)[1];s.msg=k===1?`손님이 ${nm(bet)}에 걸었고 ${nm(col)} 공이 나왔어요 → 주인 ${win?'−'+s.p['p'+bet]:'+1'}장`:`손님 ${fmtN(k)}명이 다녀갔어요`;},
  step(s,dt){s.age+=dt;},
  draw(s){paper();const mob=FS>1.3,T=this.T(s);
   card(16,16,210,226,`공 ${T}개`);if(!spr('bag',121,150,170,{w:190})){ctx.fillStyle='#f3e6d3';ctx.strokeStyle='#b58a52';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(46,70);ctx.quadraticCurveTo(26,230,121,230);ctx.quadraticCurveTo(216,230,196,70);ctx.closePath();ctx.fill();ctx.stroke();}

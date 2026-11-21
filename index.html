@@ -22,6 +22,8 @@ header{max-width:1120px;margin:0 auto;padding:14px 14px 0;display:flex;align-ite
 .hello img{display:block;width:100%}
 .head{flex:1;min-width:0}
 .brand{font-family:var(--disp);font-size:16px;color:#5f7fa3;margin:0 0 6px 6px}
+.mute{border:0;background:none;color:var(--sub);cursor:pointer;padding:2px 6px;margin-left:6px;vertical-align:middle;border-radius:10px;line-height:0}
+.mute:hover{background:#fff3e6;color:var(--ink)}
 .courses{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
 .courses::-webkit-scrollbar{display:none}
 .courses button{flex:0 0 auto;display:flex;align-items:center;gap:6px;white-space:nowrap;border:2px solid var(--out);border-bottom:0;background:#fff7ee;color:var(--sub);
@@ -88,7 +90,7 @@ canvas{display:block;width:100%;height:auto;background:#fdf8f1;touch-action:mani
 <header>
   <div class="hello"><img src="img/cat_hello.png" alt=""></div>
   <div class="head">
-    <div class="brand">직접 해 보는 실험실</div>
+    <div class="brand">직접 해 보는 실험실<button id="mute" class="mute" type="button"></button></div>
     <nav class="courses" id="courses"></nav>
   </div>
 </header>
@@ -115,10 +117,11 @@ canvas{display:block;width:100%;height:auto;background:#fdf8f1;touch-action:mani
     </aside>
   </div>
 </div>
-<script src="js/core.js?v=20261117c"></script>
-<script src="js/science.js?v=20261117c"></script>
-<script src="js/math.js?v=20261117c"></script>
-<script src="js/mood.js?v=20261117c"></script>
-<script>boot();</script>
+<script src="js/sound.js?v=20261121a"></script>
+<script src="js/core.js?v=20261121a"></script>
+<script src="js/science.js?v=20261121a"></script>
+<script src="js/math.js?v=20261121a"></script>
+<script src="js/mood.js?v=20261121a"></script>
+<script>boot();muteBtn();</script>
 </body>
 </html>
