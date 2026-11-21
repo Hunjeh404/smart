@@ -36,6 +36,9 @@ const SND={
  wheel:{spin:'slot-spin',a20:'card-shuffle',a1000:'card-shuffle',reset:'card-shuffle'},
  dicebooth:{roll:'dice-roll',a36:'card-shuffle',a3600:'card-shuffle',reset:'card-shuffle'},
  bag:{c1:s=>['pickup-item',D(s.lastWin?'coin-double':'pop-down',.45)],c100:'card-shuffle',c10000:'card-shuffle'},
+ fair:{go:'click',video:'page-turn'},race:{go:'countdown-go'},vars:{check:()=>null},collect:{test:'drop'},candle:{fire:()=>null,cover:'swipe'},co2ice:{go:'click'},
+ report:{check:()=>null},robot:{F:'click-soft',L:'click-soft',R:'click-soft',run:'click'},flyxy:{go:()=>null,fly:()=>null},
+ quiz:{plastic:()=>null,glass:()=>null,paper:()=>null,can:()=>null,next:'page-turn'},matrix:{},
  boxes:{open:s=>s.ph==='play'&&s.open===0?'card-shuffle':s.ph==='lost'?['chest-open',D('buzzer-wrong',.35)]:s.ph==='stop'?['chest-open',D('ka-ching',.35)]:['chest-open',D('coin',.35)],
    stop:'ka-ching',new:'card-shuffle',auto:'card-shuffle'},
 };

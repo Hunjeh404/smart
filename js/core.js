@@ -1,5 +1,5 @@
 "use strict";
-const VER='20261121b';
+const VER='20261121d';
 /* ================== 강의·차시 ================== */
 const COURSES=[
  {id:'sci',name:'하늘을 여는 과학자',lessons:[
@@ -13,7 +13,13 @@ const COURSES=[
   {n:2,name:'2차시 새로운 정보',c:'#3f8fd0',l:'#e8f3fd'},
   {n:3,name:'3차시 많이 해 보기',c:'#2fa084',l:'#e6f6f1'},
   {n:4,name:'4차시 기대값',c:'#8a68c8',l:'#f2ecfb'}, /* unslop-ignore: 학습노트 4차시 색 */
-  {n:5,name:'5차시 게임 설계',c:'#cf8a1c',l:'#fff4dd'}]}];
+  {n:5,name:'5차시 게임 설계',c:'#cf8a1c',l:'#fff4dd'}]},
+ {id:'ice',name:'지구온난화와 빙하',lessons:[
+  {n:1,name:'1차시 변인 통제',c:'#e2636a',l:'#ffeef0'},
+  {n:2,name:'2차시 이산화탄소 실험',c:'#3f8fd0',l:'#e8f3fd'},
+  {n:3,name:'3차시 실험 보고서',c:'#2fa084',l:'#e6f6f1'},
+  {n:4,name:'4차시 코딩과 좌표',c:'#8a68c8',l:'#f2ecfb'}, /* unslop-ignore: 다른 강의와 같은 4차시 색 */
+  {n:5,name:'5차시 묻고 답하기',c:'#cf8a1c',l:'#fff4dd'}]}];
 const EX=[];
 
 /* ================== 공통 도구 ================== */
@@ -26,7 +32,7 @@ const fmtN=n=>Math.round(n).toLocaleString('ko-KR');
 const FONT='"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif';
 let W=800,H=450,FS=1;
 function fitCanvas(){
-  const r=cv.clientWidth||W; FS=r<520?1.7:r<700?1.25:1; const dpr=Math.min(window.devicePixelRatio||1,2.5);
+  const r=cv.clientWidth||W; FS=cv.parentNode.classList.contains('fitm')?1:r<520?1.7:r<700?1.25:1; const dpr=Math.min(window.devicePixelRatio||1,2.5);
   cv.width=Math.round(r*dpr); cv.height=Math.round(r*H/W*dpr);
   ctx.setTransform(cv.width/W,0,0,cv.height/H,0,0);
 }
@@ -59,7 +65,7 @@ function person(x,y,s=1,pose='cat_throw'){ // y: 발 위치
 function handCat(px,py,gy,pose='cat_throw'){const h=(gy-py)/0.533;if(!spr(pose,px-0.287*h,gy-h/2,h))person(px-20,gy,0.8);}
 /* 일러스트 조각 */
 const IMG={};
-['bag', 'ball_b', 'ball_r', 'ball_w', 'ball_y', 'balloon', 'balloon_b', 'balloon_flat', 'balloon_r', 'bell', 'boomerang', 'booth', 'box_open', 'bubble', 'candy_po', 'candy_ps', 'candy_ro', 'candy_rs', 'car', 'cat_blow', 'cat_clap', 'cat_draw', 'cat_flip', 'cat_gift', 'cat_happy', 'cat_hello', 'cat_plane', 'cat_point', 'cat_roll', 'cat_sad', 'cat_spin', 'cat_surprise', 'cat_think', 'cat_throw', 'cat_watch', 'chair', 'chute', 'cloud_big', 'cloud_long', 'cloud_small', 'coin_g0', 'coin_g1', 'coin_g2', 'coin_g3', 'coin_g4', 'coin_g5', 'coin_s0', 'coin_s1', 'coin_s2', 'coin_s3', 'coin_s4', 'coin_s5', 'confetti', 'coupon', 'coupons', 'cup', 'cupplane', 'd6_1', 'd6_2', 'd6_3', 'd6_4', 'd6_5', 'd6_6', 'd6r0', 'd6r1', 'd6r2', 'd6r3', 'd6r4', 'd6r5', 'door', 'door_open', 'dust0', 'dust1', 'dust2', 'egg', 'egg_broken', 'egg_crack', 'fire0', 'fire1', 'fire2', 'funnel', 'gift', 'goat', 'grain0', 'grain1', 'grain2', 'grain3', 'grain4', 'hotair', 'impact', 'jar', 'lander', 'needle', 'pingpong', 'plane_dart', 'plane_flat', 'plane_glide2', 'plane_glider', 'plane_wide', 'poly10', 'poly12', 'poly16', 'poly4', 'poly6', 'poly8', 'polyr10', 'polyr12', 'polyr16', 'polyr4', 'polyr6', 'polyr8', 'ricebowl', 'ring', 'ringplane', 'rocket', 'rubber', 'slip', 'spark0', 'spark1', 'spark2', 'sparkle', 'speech', 'star', 'straw', 'thought', 'tw0', 'tw1', 'tw2', 'tw3', 'tw4', 'wheel_frame', 'wind0', 'wind1', 'wind2']
+['airdot', 'bag', 'ball_b', 'ball_r', 'ball_w', 'ball_y', 'balloon', 'balloon_b', 'balloon_flat', 'balloon_r', 'bell', 'bell_jar', 'bin_blue', 'bin_gray', 'bin_green', 'bin_yellow', 'boomerang', 'booth', 'bottle', 'bowl_hot', 'bowl_warm', 'box_open', 'bubble', 'bubbles', 'candle', 'candy_po', 'candy_ps', 'candy_ro', 'candy_rs', 'car', 'cat_blow', 'cat_clap', 'cat_draw', 'cat_flip', 'cat_gift', 'cat_happy', 'cat_hello', 'cat_plane', 'cat_point', 'cat_roll', 'cat_sad', 'cat_spin', 'cat_surprise', 'cat_think', 'cat_throw', 'cat_watch', 'chair', 'chute', 'clipboard', 'cloud_big', 'cloud_long', 'cloud_small', 'coin_g0', 'coin_g1', 'coin_g2', 'coin_g3', 'coin_g4', 'coin_g5', 'coin_s0', 'coin_s1', 'coin_s2', 'coin_s3', 'coin_s4', 'coin_s5', 'confetti', 'coupon', 'coupons', 'crate', 'cup', 'cupplane', 'cylinder', 'd6_1', 'd6_2', 'd6_3', 'd6_4', 'd6_5', 'd6_6', 'd6r0', 'd6r1', 'd6r2', 'd6r3', 'd6r4', 'd6r5', 'door', 'door_open', 'dryice', 'dust0', 'dust1', 'dust2', 'earth_happy', 'earth_sad', 'egg', 'egg_broken', 'egg_crack', 'fire0', 'fire1', 'fire2', 'flame0', 'flame1', 'flame2', 'flame3', 'fly', 'funnel', 'gift', 'goal_flag', 'goat', 'grain0', 'grain1', 'grain2', 'grain3', 'grain4', 'hotair', 'ice0', 'ice1', 'ice2', 'ice3', 'ice4', 'ice_crushed', 'ice_salt', 'idea_bag', 'idea_bike', 'idea_plug', 'idea_shade', 'idea_solar', 'idea_tree', 'impact', 'jar', 'lamp_off', 'lamp_on', 'lander', 'match', 'memo_cards', 'needle', 'pencil', 'pingpong', 'plane_dart', 'plane_flat', 'plane_glide2', 'plane_glider', 'plane_wide', 'plate', 'poly10', 'poly12', 'poly16', 'poly4', 'poly6', 'poly8', 'polyr10', 'polyr12', 'polyr16', 'polyr4', 'polyr6', 'polyr8', 'puddle0', 'puddle1', 'puddle2', 'ricebowl', 'ring', 'ringplane', 'robot', 'robot_top', 'rocket', 'rubber', 'rubber_tube', 'score_star', 'slip', 'soda', 'spark0', 'spark1', 'spark2', 'sparkle', 'speech', 'squirrel', 'star', 'straw', 'table_paper', 'thought', 'tr_box', 'tr_can', 'tr_glass', 'tr_milk', 'tr_paper', 'tr_pet', 'trough', 'tw0', 'tw1', 'tw2', 'tw3', 'tw4', 'wheel_frame', 'wind0', 'wind1', 'wind2']
  .forEach(n=>{const i=new Image();i.src='img/'+n+'.png?v='+VER;IMG[n]=i;});
 function spr(n,x,y,h,o={}){const im=IMG[n];if(!im||!im.complete||!im.naturalWidth)return false;const w=(o.w!=null?o.w:h*im.naturalWidth/im.naturalHeight);
   ctx.save();ctx.translate(x,y);if(o.rot)ctx.rotate(o.rot);ctx.scale((o.flip?-1:1)*(o.sx??1),o.sy??1);if(o.a!=null)ctx.globalAlpha*=o.a;ctx.drawImage(im,-w/2,-h/2,w,h);ctx.restore();return true;}
@@ -125,7 +131,7 @@ function setLesson(n,keep){curLesson=n;const L=curCourse.lessons[n-1];document.d
   const list=EX.filter(e=>e.course===curCourse.id&&e.lesson===n);$('chips').innerHTML='';
   list.forEach(e=>{const b=document.createElement('button');b.textContent=e.name;b.onclick=()=>{sfx('click-soft');setEx(e);};b.dataset.id=e.id;$('chips').appendChild(b);});
   if(!keep&&list[0])setEx(list[0]);}
-function setEx(e){if(typeof sfxStopAll==='function')sfxStopAll();cur=e;[W,H]=e.size;[...$('chips').children].forEach(b=>b.classList.toggle('on',b.dataset.id===e.id));
+function setEx(e){if(typeof sfxStopAll==='function')sfxStopAll();cur=e;const fm=!!(e.sizeM&&matchMedia('(max-width:560px)').matches);[W,H]=fm?e.sizeM:e.size;cv.parentNode.classList.toggle('fitm',fm);[...$('chips').children].forEach(b=>b.classList.toggle('on',b.dataset.id===e.id));
   $('exTitle').textContent=e.name;$('exLesson').textContent=curCourse.name+' · '+curCourse.lessons[e.lesson-1].name;$('exAsk').innerHTML=e.ask;
   st={p:{}};e.controls.forEach(c=>st.p[c.key]=typeof c.val==='object'?{...c.val}:c.val);
   buildControls();e.reset(st);$('why').innerHTML=e.why;

@@ -22,5 +22,16 @@ const MOOD={
  wheel:s=>s.spin?'spin':s.win===true?'clap':s.win===false?'sad':'think',
  dicebooth:s=>s.rolling>0?'roll':s.win===true?'clap':s.win===false?'sad':'think',
  bag:s=>{if(s.age<.8&&s.col)return 'draw';const e=Math.max(...['r','b','w'].map(k=>s.p['n'+k]*s.p['p'+k]-(s.p.nr+s.p.nb+s.p.nw-s.p['n'+k])));return e>0?'sad':'happy';},
- boxes:s=>s.ph==='lost'?'sad':s.ph==='stop'?'clap':s.open&&s.age<.6?'gift':'think'
+ boxes:s=>s.ph==='lost'?'sad':s.ph==='stop'?'clap':s.open&&s.age<.6?'gift':'think',
+ fair:s=>s.done?(cur.diffs(s).length===1?'clap':'think'):s.run?'watch':'point',
+ race:s=>s.done?(s.fin[0]===s.p.guess?'clap':'surprise'):s.run?'watch':'think',
+ vars:s=>s.checked?(s.cards.every(c=>c.v===c.a)?'clap':'sad'):'think',
+ collect:s=>s.test&&s.test.t>1.4?(s.test.out?'surprise':'think'):s.shake?'watch':'point',
+ candle:s=>s.lit&&s.cov?'watch':s.last&&!s.lit?'surprise':'point',
+ co2ice:s=>s.run?'watch':s.res?'point':'think',
+ report:s=>s.checked?(s.cards.every(c=>c.at===c.a)?'clap':'sad'):'think',
+ robot:s=>s.res==='goal'?'clap':s.res?'sad':s.run?'watch':'think',
+ flyxy:s=>s.res==='ok'?'clap':s.res==='no'?'sad':'point',
+ quiz:s=>s.res==='ok'?'happy':s.res==='no'?'sad':'think',
+ matrix:s=>'point'
 };
